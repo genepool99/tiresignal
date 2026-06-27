@@ -84,7 +84,7 @@ def write_report(context):
 
     html = html_start(generated_at)
 
-    html += """
+    html += f"""
     <div class="tabs" role="tablist" aria-label="TPMS report sections">
       <button
         type="button"
@@ -92,7 +92,7 @@ def write_report(context):
         data-tab-target="tab-overview"
         onclick="showReportTab('tab-overview')"
       >
-        Overview
+        Overview ({known_count + watch_count})
       </button>
       <button
         type="button"
@@ -100,7 +100,7 @@ def write_report(context):
         data-tab-target="tab-charts"
         onclick="showReportTab('tab-charts')"
       >
-        Charts
+        Charts ({len(events)})
       </button>
       <button
         type="button"
@@ -108,7 +108,7 @@ def write_report(context):
         data-tab-target="tab-details"
         onclick="showReportTab('tab-details')"
       >
-        Details
+        Details ({len(recent_pass_rows)})
       </button>
     </div>
 
