@@ -55,6 +55,26 @@ def is_tpms(event):
     return any(hint in model for hint in TPMS_HINTS)
 
 
+def extract_temperature_c(event):
+    celsius = as_float(first_present(
+        event,
+        ["temperature_C", "temperature_Celsius", "temp_C", "temp_Celsius"],
+    ))
+
+    if celsius is not None:
+        return celsius
+
+    fahrenheit = as_float(first_present(
+        event,
+        ["temperature_F", "temperature_Fahrenheit", "temp_F", "temp_Fahrenheit"],
+    ))
+
+    if fahrenheit is not None:
+        return (fahrenheit - 32) * 5 / 9
+
+    return None
+
+
 def ingest_log(conn):
     stats = {
         "imported": 0,
@@ -103,7 +123,7 @@ def ingest_log(conn):
 
             pressure_kpa = as_float(first_present(event, ["pressure_kPa", "pressure_kpa"]))
             pressure_psi = as_float(first_present(event, ["pressure_PSI", "pressure_psi"]))
-            temperature_c = as_float(first_present(event, ["temperature_C", "temperature_Celsius"]))
+            temperature_c = extract_temperature_c(event)
             battery_value = first_present(event, ["battery_ok", "battery"])
 
             raw_json = json.dumps(event, sort_keys=True, separators=(",", ":"), default=str)
@@ -151,6 +171,48 @@ def ingest_log(conn):
 
     conn.commit()
     return stats
+
+
+def backfill_temperature_c(conn):
+    rows = conn.execute("""
+        SELECT id, raw_json
+        FROM tpms_events
+        WHERE temperature_c IS NULL
+          AND (
+            raw_json LIKE '%temperature_C%'
+            OR raw_json LIKE '%temperature_Celsius%'
+            OR raw_json LIKE '%temp_C%'
+            OR raw_json LIKE '%temp_Celsius%'
+            OR raw_json LIKE '%temperature_F%'
+            OR raw_json LIKE '%temperature_Fahrenheit%'
+            OR raw_json LIKE '%temp_F%'
+            OR raw_json LIKE '%temp_Fahrenheit%'
+          )
+    """).fetchall()
+
+    updates = []
+
+    for row in rows:
+        try:
+            event = json.loads(row["raw_json"])
+        except (TypeError, json.JSONDecodeError):
+            continue
+
+        temperature_c = extract_temperature_c(event)
+
+        if temperature_c is None:
+            continue
+
+        updates.append((temperature_c, row["id"]))
+
+    if updates:
+        conn.executemany(
+            "UPDATE tpms_events SET temperature_c = ? WHERE id = ?",
+            updates,
+        )
+
+    conn.commit()
+    return len(updates)
 
 
 def load_events(conn):

@@ -15,7 +15,7 @@ from analysis import (
     summarize_overlap_candidates,
     summarize_sensors,
 )
-from db import connect_db, ingest_log, init_db, load_events, prune_events
+from db import backfill_temperature_c, connect_db, ingest_log, init_db, load_events, prune_events
 from report import write_report
 from tpms_config import DB_PATH, OUT_DIR, REPORT_PATH, STATUS_PATH, VEHICLE_MAP_PATH, ensure_dirs
 from vehicle_map import load_vehicle_map
@@ -31,6 +31,7 @@ def main():
 
     ingest_stats = ingest_log(conn)
     prune_stats = prune_events(conn, normalized_vehicles)
+    temperature_backfilled = backfill_temperature_c(conn)
     events = load_events(conn)
 
     sensor_summaries = summarize_sensors(events, sensor_to_vehicle)
@@ -106,6 +107,9 @@ def main():
     print(f"Non-TPMS lines: {ingest_stats.get('non_tpms', 0)}")
     print(f"Malformed JSON lines: {ingest_stats.get('malformed', 0)}")
     print(f"TPMS lines without sensor ID: {ingest_stats.get('no_sensor_id', 0)}")
+
+    if temperature_backfilled > 0:
+        print(f"Backfilled temperature_c for {temperature_backfilled} TPMS events.")
     print(f"Total TPMS events in DB: {len(events)}")
     print(f"Unique TPMS IDs: {len(sensor_summaries)}")
     print(f"Detected passes: {len(vehicle_passes)}")
