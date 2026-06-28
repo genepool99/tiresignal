@@ -297,6 +297,82 @@ def html_start(generated_at):
       overflow: hidden;
     }}
 
+    details.section > summary.section-summary {{
+      list-style: none;
+      cursor: pointer;
+      margin: -18px -18px 16px;
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: var(--soft);
+      border-bottom: 1px solid var(--border);
+    }}
+
+    details.section:not([open]) > summary.section-summary {{
+      margin-bottom: -18px;
+      border-bottom: 0;
+    }}
+
+    details.section > summary.section-summary::-webkit-details-marker {{
+      display: none;
+    }}
+
+    details.section > summary.section-summary::marker {{
+      content: "";
+    }}
+
+    details.section > summary.section-summary:hover {{
+      background: #eef4ff;
+    }}
+
+    details.section > summary.section-summary:focus-visible {{
+      outline: 3px solid rgba(37, 99, 235, 0.35);
+      outline-offset: 3px;
+    }}
+
+    .section-summary-main {{
+      min-width: 0;
+    }}
+
+    .section-summary-title {{
+      display: block;
+      color: var(--text);
+      font-size: 1.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+    }}
+
+    .section-summary-subtitle {{
+      display: block;
+      color: var(--muted);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-top: 4px;
+    }}
+
+    .section-summary-action {{
+      flex: 0 0 auto;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 7px 11px;
+      background: #ffffff;
+      color: var(--text);
+      font-size: 0.8rem;
+      font-weight: 800;
+      white-space: nowrap;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.08);
+    }}
+
+    details.section:not([open]) .section-summary-action::before {{
+      content: "Expand ▾";
+    }}
+
+    details.section[open] .section-summary-action::before {{
+      content: "Collapse ▴";
+    }}
+
     .chart {{
       height: 560px;
       margin: 12px 0 24px;
@@ -715,8 +791,14 @@ def known_vehicle_section(rows):
 
 def ignored_vehicle_section(rows):
     html = """
-    <div class="section">
-      <h2>Ignored Vehicles</h2>
+    <details class="section">
+      <summary class="section-summary">
+        <span class="section-summary-main">
+          <span class="section-summary-title">Ignored Vehicles</span>
+          <span class="section-summary-subtitle">Click to expand or collapse this section</span>
+        </span>
+        <span class="section-summary-action" aria-hidden="true"></span>
+      </summary>
       <p class="muted">Ignored entries from vehicles.json. Restore one to Known or Watchlist if it should be tracked again.</p>
       <div class="toolbar">
         <input placeholder="Search ignored vehicles..." oninput="filterTable('ignoredVehicleTable', this.value)">
@@ -785,15 +867,21 @@ def ignored_vehicle_section(rows):
     html += """
         </tbody>
       </table>
-    </div>
+    </details>
 """
     return html
 
 
 def new_unknown_section(rows):
     html = """
-    <div class="section">
-      <h2>New Repeat Unknowns</h2>
+    <details class="section">
+      <summary class="section-summary">
+        <span class="section-summary-main">
+          <span class="section-summary-title">New Repeat Unknowns</span>
+          <span class="section-summary-subtitle">Click to expand or collapse this section</span>
+        </span>
+        <span class="section-summary-action" aria-hidden="true"></span>
+      </summary>
       <p class="muted">Unlabeled repeat candidates. These are good candidates to add to vehicles.json as known, watch, or ignore.</p>
       <div class="toolbar">
         <input placeholder="Search unknown candidates..." oninput="filterTable('newUnknownTable', this.value)">
@@ -877,15 +965,21 @@ def new_unknown_section(rows):
     html += """
         </tbody>
       </table>
-    </div>
+    </details>
 """
     return html
 
 
 def overlap_candidates_section(rows):
     html = """
-    <div class="section">
-      <h2>Best Guess Vehicle Candidates</h2>
+    <details class="section">
+      <summary class="section-summary">
+        <span class="section-summary-main">
+          <span class="section-summary-title">Best Guess Vehicle Candidates</span>
+          <span class="section-summary-subtitle">Click to expand or collapse this section</span>
+        </span>
+        <span class="section-summary-action" aria-hidden="true"></span>
+      </summary>
       <p class="muted">Merges repeated passes that share two or more sensor IDs. Best table for a busy road.</p>
       <div class="toolbar">
         <input placeholder="Search names, IDs, confidence..." oninput="filterTable('overlapCandidateTable', this.value)">
@@ -925,15 +1019,21 @@ def overlap_candidates_section(rows):
     html += """
         </tbody>
       </table>
-    </div>
+    </details>
 """
     return html
 
 
 def exact_candidates_section(rows):
     html = """
-    <div class="section">
-      <h2>Exact Repeat Sensor Groups</h2>
+    <details class="section">
+      <summary class="section-summary">
+        <span class="section-summary-main">
+          <span class="section-summary-title">Exact Repeat Sensor Groups</span>
+          <span class="section-summary-subtitle">Click to expand or collapse this section</span>
+        </span>
+        <span class="section-summary-action" aria-hidden="true"></span>
+      </summary>
       <p class="muted">Exact repeated sensor groups. Stricter than overlap matching.</p>
       <div class="toolbar">
         <input placeholder="Search exact candidates..." oninput="filterTable('exactCandidateTable', this.value)">
@@ -973,7 +1073,7 @@ def exact_candidates_section(rows):
     html += """
         </tbody>
       </table>
-    </div>
+    </details>
 """
     return html
 
@@ -1004,8 +1104,14 @@ def charts_section():
 
 def recent_passes_section(rows):
     html = """
-    <div class="section">
-      <h2>Recent Passes</h2>
+    <details class="section" open>
+      <summary class="section-summary">
+        <span class="section-summary-main">
+          <span class="section-summary-title">Recent Passes</span>
+          <span class="section-summary-subtitle">Click to expand or collapse this section</span>
+        </span>
+        <span class="section-summary-action" aria-hidden="true"></span>
+      </summary>
       <p class="muted">Single-sensor passes are included, but they are weak evidence next to a busy road.</p>
       <div class="toolbar">
         <input placeholder="Search recent passes..." oninput="filterTable('passTable', this.value)">
@@ -1050,15 +1156,21 @@ def recent_passes_section(rows):
     html += """
         </tbody>
       </table>
-    </div>
+    </details>
 """
     return html
 
 
 def sensor_section(rows):
     html = """
-    <div class="section">
-      <h2>Unique TPMS Sensor IDs</h2>
+    <details class="section">
+      <summary class="section-summary">
+        <span class="section-summary-main">
+          <span class="section-summary-title">Unique TPMS Sensor IDs</span>
+          <span class="section-summary-subtitle">Click to expand or collapse this section</span>
+        </span>
+        <span class="section-summary-action" aria-hidden="true"></span>
+      </summary>
       <p class="muted">Raw sensor-level summary. Use this to label vehicles.</p>
       <div class="toolbar">
         <input placeholder="Search sensor IDs, models, names..." oninput="filterTable('sensorTable', this.value)">
@@ -1104,15 +1216,21 @@ def sensor_section(rows):
     html += """
         </tbody>
       </table>
-    </div>
+    </details>
 """
     return html
 
 
 def recent_events_section(rows):
     html = """
-    <div class="section">
-      <h2>Recent Raw Events</h2>
+    <details class="section">
+      <summary class="section-summary">
+        <span class="section-summary-main">
+          <span class="section-summary-title">Recent Raw Events</span>
+          <span class="section-summary-subtitle">Click to expand or collapse this section</span>
+        </span>
+        <span class="section-summary-action" aria-hidden="true"></span>
+      </summary>
       <div class="toolbar">
         <input placeholder="Search recent events..." oninput="filterTable('eventTable', this.value)">
       </div>
@@ -1150,7 +1268,7 @@ def recent_events_section(rows):
     html += """
         </tbody>
       </table>
-    </div>
+    </details>
 """
     return html
 
