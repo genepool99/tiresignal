@@ -206,7 +206,7 @@ Then test:
 
 1. Start the add-on manually from the add-on page.
 2. Click the report **Refresh** button.
-3. Run the scheduled automation manually from **Developer Tools → Services**.
+3. Run the scheduled automation manually from **Settings → Automations & Scenes**, or call `automation.trigger` from **Developer Tools**.
 4. Test one low-risk vehicle labeling action from the report.
 
 ## Expected project layout
