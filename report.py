@@ -1564,6 +1564,15 @@ def html_end(timeline_points, daily_counts, hourly_counts):
 
     makeTablesSortable();
 
+    let chartsRendered = false;
+
+    function ensureChartsRendered() {{
+      if (!chartsRendered) {{
+        renderCharts();
+        chartsRendered = true;
+      }}
+    }}
+
     function showReportTab(tabId) {{
       document.querySelectorAll(".tab-panel").forEach(panel => {{
         panel.classList.toggle("active", panel.id === tabId);
@@ -1577,6 +1586,8 @@ def html_end(timeline_points, daily_counts, hourly_counts):
       localStorage.setItem("tpmsReportActiveTab", tabId);
 
       if (tabId === "tab-charts" && window.Plotly) {{
+        ensureChartsRendered();
+
         setTimeout(() => {{
           document.querySelectorAll("#tab-charts .js-plotly-plot").forEach(chart => {{
             Plotly.Plots.resize(chart);
@@ -1978,19 +1989,8 @@ def html_end(timeline_points, daily_counts, hourly_counts):
     function renderCharts() {{
       const points = getFilteredChartPointsByTime();
       const emptyMessage = "No data for selected time range";
-      const timeFilter = document.getElementById("chart-time-filter");
       const suspiciousPressureToggle = document.getElementById("chart-show-suspicious-pressure");
       const showSuspiciousPressure = Boolean(suspiciousPressureToggle && suspiciousPressureToggle.checked);
-
-      if (timeFilter) {{
-        timeFilter.removeEventListener("change", renderCharts);
-        timeFilter.addEventListener("change", renderCharts);
-      }}
-
-      if (suspiciousPressureToggle) {{
-        suspiciousPressureToggle.removeEventListener("change", renderCharts);
-        suspiciousPressureToggle.addEventListener("change", renderCharts);
-      }}
 
       if (!points.length) {{
         updatePressureChartNote(0);
@@ -2084,22 +2084,34 @@ def html_end(timeline_points, daily_counts, hourly_counts):
         emptyChart("pressureChart", "TPMS pressure values, normalized to PSI", emptyMessage, "Pressure (PSI)");
       }}
 
-      const temperaturePointCount = points
-        .map(point => numericValue(point.temperature_c))
-        .filter(value => value !== null).length;
-      const temperatureTraces = groupedMetricTraces(
-        points,
-        point => numericValue(point.temperature_c),
-        point => `${{point.sensor_id}} ${{point.model || ""}} °C`
-      );
+      const temperaturePoints = points
+        .map(point => ({{
+          point,
+          value: numericValue(point.temperature_c)
+        }}))
+        .filter(row => row.value !== null);
 
-      if (temperaturePointCount >= 2 && temperatureTraces.length) {{
-        Plotly.newPlot("temperatureChart", temperatureTraces, {{
-          title: "TPMS temperature values",
-          xaxis: {{ title: "Time" }},
-          yaxis: {{ title: "Temperature (°C)" }},
-          margin: {{ l: 80, r: 30, t: 50, b: 60 }}
-        }});
+      if (temperaturePoints.length >= 2) {{
+        try {{
+          Plotly.newPlot("temperatureChart", [{{
+            name: "Temperature",
+            x: temperaturePoints.map(row => row.point.time),
+            y: temperaturePoints.map(row => row.value),
+            mode: "markers",
+            type: "scatter",
+            text: temperaturePoints.map(row => `${{row.point.sensor_id || "Unknown"}}<br>${{row.point.model || "Unknown"}}<br>Protocol: ${{row.point.protocol || "Unknown"}}<br>Temperature C: ${{row.value.toFixed(1)}}`),
+            hovertemplate: "%{{text}}<extra></extra>",
+            marker: {{ size: 5 }}
+          }}], {{
+            title: "TPMS temperature values",
+            xaxis: {{ title: "Time" }},
+            yaxis: {{ title: "Temperature (°C)" }},
+            margin: {{ l: 80, r: 30, t: 50, b: 60 }}
+          }});
+        }} catch (error) {{
+          console.error("Temperature chart failed to render", error);
+          emptyChart("temperatureChart", "TPMS temperature values", "Temperature chart failed to render", "Temperature (°C)");
+        }}
       }} else {{
         emptyChart("temperatureChart", "TPMS temperature values", "Not enough temperature data for this time range", "Temperature (°C)");
       }}
@@ -2157,12 +2169,19 @@ def html_end(timeline_points, daily_counts, hourly_counts):
     }}
 
     const chartTimeFilter = document.getElementById("chart-time-filter");
+    const suspiciousPressureToggle = document.getElementById("chart-show-suspicious-pressure");
 
     if (chartTimeFilter) {{
-      chartTimeFilter.addEventListener("change", renderCharts);
+      chartTimeFilter.addEventListener("change", () => {{
+        if (chartsRendered) renderCharts();
+      }});
     }}
 
-    renderCharts();
+    if (suspiciousPressureToggle) {{
+      suspiciousPressureToggle.addEventListener("change", () => {{
+        if (chartsRendered) renderCharts();
+      }});
+    }}
   </script>
 </body>
 </html>
