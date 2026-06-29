@@ -2,6 +2,17 @@
 
 Reads `rtl_433` JSONL log data, stores TPMS events in SQLite, groups repeated sensor IDs into vehicle pass candidates, matches known/watch/ignored vehicles, and generates an HTML report served by Home Assistant.
 
+## Before installing
+
+Install and configure the `rtl_433` Home Assistant add-on first. TPMS Analyzer reads the JSONL log written by `rtl_433`; it does not run `rtl_433` itself.
+
+The expected `rtl_433.conf.template` output is:
+
+```text
+output json:/config/rtl_433/logs/rtl_433.jsonl
+convert customary
+```
+
 ## Requirements
 
 The `rtl_433` add-on must be installed and configured to write JSON Lines output to a file. The default expected path is:

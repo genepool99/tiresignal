@@ -75,6 +75,8 @@ In the add-on **Configuration** tab, set these options:
 
 Click **Start** on the add-on page. The add-on runs once and exits.
 
+The generated report will open normally, but the in-report **Refresh** and vehicle labeling buttons still require matching Home Assistant webhook automations using the webhook IDs configured above.
+
 The HTML report is written to:
 
 ```text
