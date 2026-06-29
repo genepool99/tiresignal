@@ -103,6 +103,112 @@ In add-on mode, all persistent state lives inside the add-on's private `/data` v
 
 This is separate from the older bare-metal install path (`/config/rtl_433/tpms_analyzer/`). The report output path (`/config/www/rtl_433/`) is the same in both modes.
 
+## Home Assistant automation setup
+
+The add-on does not automatically create automations, scripts, or shell commands. Add these manually to your HA YAML files if you want scheduled analysis, the report Refresh button, and vehicle labeling to work.
+
+### Confirm your add-on slug
+
+Open **Settings → Add-ons → TPMS Analyzer → Info** and copy the installed add-on slug. Custom add-on slugs include a repository hash and look like:
+
+```
+843f4ad8_tpms_analyzer
+```
+
+Replace `ADDON_SLUG_HERE` in all examples below with your real slug.
+
+### Optional shared vehicle map path
+
+For the report's vehicle labeling buttons to work with this first add-on version, set this option in the add-on **Configuration** tab:
+
+```yaml
+vehicle_map_path: /config/rtl_433/tpms_analyzer/vehicles.json
+```
+
+This tells the add-on to read and write `vehicles.json` from a path inside `/config/` instead of the default `/data/` location. The legacy shell_command that handles vehicle edits can then write to the same file the add-on reads. Future versions may replace this bridge with a native add-on endpoint.
+
+### `configuration.yaml`
+
+Add this under the top-level `shell_command:` block. If `shell_command:` already exists, add only the `tpms_edit_vehicle_map` entry — do not create a second `shell_command:` key.
+
+```yaml
+shell_command:
+  tpms_edit_vehicle_map: >-
+    bash -lc 'cd /config/rtl_433/tpms_analyzer && mkdir -p output && printf "%s" "$1" | base64 -d > output/vehicle_map_edit_payload.json && python3 vehicle_map_editor.py < output/vehicle_map_edit_payload.json' _ "{{ payload }}"
+```
+
+This command only handles vehicle-map edits. It does not run the analyzer. The automation starts the add-on after the edit completes (see automations below).
+
+### `scripts.yaml`
+
+```yaml
+refresh_tpms_report:
+  alias: Refresh TPMS Report
+  sequence:
+    - service: hassio.addon_start
+      data:
+        addon: ADDON_SLUG_HERE
+```
+
+### `automations.yaml`
+
+```yaml
+- id: tpms_analyze_rtl433_log
+  alias: Analyze rtl_433 TPMS log
+  mode: single
+  trigger:
+    - platform: time
+      at: "03:10:00"
+  action:
+    - service: hassio.addon_start
+      data:
+        addon: ADDON_SLUG_HERE
+
+- alias: TPMS report webpage refresh webhook
+  id: tpms_report_webpage_refresh_webhook
+  mode: single
+  trigger:
+    - platform: webhook
+      webhook_id: tpms-refresh-report-a8f3c91b7d22
+      allowed_methods:
+        - POST
+      local_only: false
+  action:
+    - service: script.refresh_tpms_report
+
+- alias: TPMS vehicle map edit webhook
+  id: tpms_vehicle_map_edit_webhook
+  mode: single
+  triggers:
+    - trigger: webhook
+      webhook_id: tpms-vehicle-map-edit-b8f41c6a9e73
+      allowed_methods:
+        - POST
+      local_only: true
+  actions:
+    - variables:
+        edit_payload: "{{ trigger.json | tojson | base64_encode }}"
+    - action: shell_command.tpms_edit_vehicle_map
+      data:
+        payload: "{{ edit_payload }}"
+    - action: hassio.addon_start
+      data:
+        addon: ADDON_SLUG_HERE
+```
+
+### Reload or restart
+
+After editing `scripts.yaml` and `automations.yaml`, reload scripts and automations from **Developer Tools → YAML**.
+
+After editing `configuration.yaml` `shell_command` entries, restart Home Assistant Core.
+
+Then test:
+
+1. Start the add-on manually from the add-on page.
+2. Click the report **Refresh** button.
+3. Run the scheduled automation manually from **Developer Tools → Services**.
+4. Test one low-risk vehicle labeling action from the report.
+
 ## Expected project layout
 
 Recommended path inside Home Assistant:
