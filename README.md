@@ -27,6 +27,80 @@ This was designed for a Home Assistant VM setup with the `rtl_433` add-on writin
 
 TPMS IDs can act like vehicle fingerprints. Keep the generated data local, do not publish the report publicly, and treat the data similarly to camera, Bluetooth tracking, or license-plate-reader telemetry.
 
+## Install as a Home Assistant add-on
+
+This is the recommended install path. For the older bare-metal shell_command approach, see the sections below.
+
+### 1. Install rtl_433 first
+
+TPMS Analyzer reads JSONL logs written by the rtl_433 add-on. Add the rtl_433 add-on repository to Home Assistant:
+
+[![Add rtl_433 add-on repository to My Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fpbkhrv%2Frtl_433-hass-addons)
+
+Then install the **rtl_433** add-on and add the following to your `rtl_433.conf.template`:
+
+```text
+output json:/config/rtl_433/logs/rtl_433.jsonl
+convert customary
+```
+
+* `output json:...` creates the JSONL log file that TPMS Analyzer reads.
+* `convert customary` keeps pressure values in PSI, which matches the default report behavior.
+
+### 2. Install TPMS Analyzer
+
+Add this repository to Home Assistant:
+
+[![Add TPMS Analyzer add-on repository to My Home Assistant](https://my.home-assistant.io/badges/supervisor_add_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_add_addon_repository/?repository_url=https%3A%2F%2Fgithub.com%2Fgenepool99%2Ftpms_analyzer)
+
+Or add it manually: **Settings → Add-ons → Add-on Store → ⋮ → Repositories**, then paste:
+
+```
+https://github.com/genepool99/tpms_analyzer
+```
+
+Find **TPMS Analyzer** in the store and click **Install**.
+
+### 3. Configure add-on options
+
+In the add-on **Configuration** tab, set these options:
+
+| Option | Default | Description |
+|---|---|---|
+| `log_path` | `/config/rtl_433/logs/rtl_433.jsonl` | Path to the rtl_433 JSONL log. Must match your rtl_433 `output json:` path. |
+| `refresh_webhook_id` | `tpms-refresh-report-a8f3c91b7d22` | Webhook ID for the report's Refresh button. Must match your HA automation. |
+| `vehicle_map_edit_webhook_id` | `tpms-vehicle-map-edit-b8f41c6a9e73` | Webhook ID for report vehicle labeling actions. Must match your HA automation. |
+
+### 4. Run and view the report
+
+Click **Start** on the add-on page. The add-on runs once and exits.
+
+The HTML report is written to:
+
+```text
+/config/www/rtl_433/tpms_report.html
+```
+
+Home Assistant serves it at:
+
+```text
+/local/rtl_433/tpms_report.html
+```
+
+To add it as a dashboard panel: **Settings → Dashboards → Add Dashboard → Webpage**, URL: `/local/rtl_433/tpms_report.html`.
+
+### 5. Add-on data location
+
+In add-on mode, all persistent state lives inside the add-on's private `/data` volume:
+
+```text
+/data/tpms.sqlite        — SQLite event database
+/data/vehicles.json      — your vehicle labels
+/data/output/            — timestamped backups of vehicles.json
+```
+
+This is separate from the older bare-metal install path (`/config/rtl_433/tpms_analyzer/`). The report output path (`/config/www/rtl_433/`) is the same in both modes.
+
 ## Expected project layout
 
 Recommended path inside Home Assistant:
