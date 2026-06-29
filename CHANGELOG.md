@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.1.2
+
+### Changed
+
+- Vehicle-edit bridge now runs `vehicle_map_editor.py` inside the add-on container instead of on the Home Assistant host.
+- `shell_command.tpms_edit_vehicle_map` now only writes a staging payload file to `/config/rtl_433/tpms_edit_payload.json`; no TPMS Python files are required on the host.
+- `vehicle_map_path` no longer needs to be set to `/config/rtl_433/tpms_analyzer/vehicles.json` for vehicle labeling to work. The default `/data/vehicles.json` is sufficient.
+- The add-on detects the staging payload file at startup, applies the edit, removes the file, and then runs the full analysis.
+
 ## 0.1.1
 
 ### Added
