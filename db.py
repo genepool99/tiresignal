@@ -33,6 +33,7 @@ def init_db(conn):
             pressure_psi REAL,
             temperature_c REAL,
             battery_ok TEXT,
+            maybe_battery REAL,
             rssi REAL,
             snr REAL,
             noise REAL,
@@ -40,6 +41,14 @@ def init_db(conn):
             raw_hash TEXT UNIQUE
         )
     """)
+
+    columns = {
+        row["name"]
+        for row in conn.execute("PRAGMA table_info(tpms_events)").fetchall()
+    }
+
+    if "maybe_battery" not in columns:
+        conn.execute("ALTER TABLE tpms_events ADD COLUMN maybe_battery REAL")
 
     conn.commit()
 
@@ -125,6 +134,7 @@ def ingest_log(conn):
             pressure_psi = as_float(first_present(event, ["pressure_PSI", "pressure_psi"]))
             temperature_c = extract_temperature_c(event)
             battery_value = first_present(event, ["battery_ok", "battery"])
+            maybe_battery = as_float(first_present(event, ["maybe_battery"]))
 
             raw_json = json.dumps(event, sort_keys=True, separators=(",", ":"), default=str)
             raw_hash = f"{event_time_text}|{sensor_id}|{event.get('model', '')}|{raw_json}"
@@ -140,13 +150,14 @@ def ingest_log(conn):
                         pressure_psi,
                         temperature_c,
                         battery_ok,
+                        maybe_battery,
                         rssi,
                         snr,
                         noise,
                         raw_json,
                         raw_hash
                     )
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                 """, (
                     event_time_text,
                     sensor_id,
@@ -156,6 +167,7 @@ def ingest_log(conn):
                     pressure_psi,
                     temperature_c,
                     str(battery_value) if battery_value is not None else None,
+                    maybe_battery,
                     as_float(event.get("rssi")),
                     as_float(event.get("snr")),
                     as_float(event.get("noise")),
@@ -215,6 +227,39 @@ def backfill_temperature_c(conn):
     return len(updates)
 
 
+def backfill_maybe_battery(conn):
+    rows = conn.execute("""
+        SELECT id, raw_json
+        FROM tpms_events
+        WHERE maybe_battery IS NULL
+          AND raw_json LIKE '%maybe_battery%'
+    """).fetchall()
+
+    updates = []
+
+    for row in rows:
+        try:
+            event = json.loads(row["raw_json"])
+        except (TypeError, json.JSONDecodeError):
+            continue
+
+        maybe_battery = as_float(first_present(event, ["maybe_battery"]))
+
+        if maybe_battery is None:
+            continue
+
+        updates.append((maybe_battery, row["id"]))
+
+    if updates:
+        conn.executemany(
+            "UPDATE tpms_events SET maybe_battery = ? WHERE id = ?",
+            updates,
+        )
+
+    conn.commit()
+    return len(updates)
+
+
 def load_events(conn):
     rows = conn.execute("""
         SELECT
@@ -226,6 +271,7 @@ def load_events(conn):
             pressure_psi,
             temperature_c,
             battery_ok,
+            maybe_battery,
             rssi,
             snr,
             noise
@@ -248,6 +294,7 @@ def load_events(conn):
             "pressure_psi": row["pressure_psi"],
             "temperature_c": row["temperature_c"],
             "battery_ok": row["battery_ok"],
+            "maybe_battery": row["maybe_battery"],
             "rssi": row["rssi"],
             "snr": row["snr"],
             "noise": row["noise"],
