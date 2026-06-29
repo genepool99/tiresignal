@@ -38,16 +38,6 @@ SERVICE_PORT = env_int("TPMS_SERVICE_PORT", 8099)
 REPORT_PATH = env_path("TPMS_REPORT_PATH", "/config/www/rtl_433/tpms_report.html")
 STATUS_PATH = env_path("TPMS_STATUS_PATH", "/config/www/rtl_433/tpms_status.json")
 
-REFRESH_WEBHOOK_ID = os.environ.get(
-    "TPMS_REFRESH_WEBHOOK_ID",
-    "tpms-refresh-report-a8f3c91b7d22",
-)
-
-VEHICLE_MAP_EDIT_WEBHOOK_ID = os.environ.get(
-    "TPMS_VEHICLE_MAP_EDIT_WEBHOOK_ID",
-    "tpms-vehicle-map-edit-b8f41c6a9e73",
-)
-
 # Busy road mode: short window prevents merging several passing cars.
 PASS_WINDOW_SECONDS = 5
 
