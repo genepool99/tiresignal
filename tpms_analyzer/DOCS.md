@@ -48,6 +48,7 @@ output json:/config/rtl_433/logs/rtl_433.jsonl
 | `log_path` | `/config/rtl_433/logs/rtl_433.jsonl` | Path to the rtl_433 JSONL log file. |
 | `refresh_webhook_id` | `tpms-refresh-report-a8f3c91b7d22` | Webhook ID used by the report's Refresh button to trigger re-analysis. Must match the webhook ID in your HA automation. |
 | `vehicle_map_edit_webhook_id` | `tpms-vehicle-map-edit-b8f41c6a9e73` | Webhook ID used by the report's vehicle labeling actions. Must match the webhook ID in your HA automation. |
+| `vehicle_map_path` | `/data/vehicles.json` | Path to the vehicle map used by the add-on. Keep the default for add-on-private state, or set to `/config/rtl_433/tpms_analyzer/vehicles.json` when using the vehicle-labeling bridge. |
 
 ## Viewing the report
 
