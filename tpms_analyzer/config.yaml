@@ -1,0 +1,24 @@
+name: TPMS Analyzer
+version: "0.1.0"
+slug: tpms_analyzer
+description: Analyzes rtl_433 TPMS sensor data and generates an HTML report.
+url: https://github.com/genepool99/tpms_analyzer
+arch:
+  - aarch64
+  - amd64
+  - armhf
+  - armv7
+  - i386
+startup: once
+boot: manual
+init: false
+map:
+  - config:rw
+options:
+  refresh_webhook_id: "tpms-refresh-report-a8f3c91b7d22"
+  vehicle_map_edit_webhook_id: "tpms-vehicle-map-edit-b8f41c6a9e73"
+  log_path: "/config/rtl_433/logs/rtl_433.jsonl"
+schema:
+  refresh_webhook_id: str
+  vehicle_map_edit_webhook_id: str
+  log_path: str

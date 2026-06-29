@@ -1,0 +1,22 @@
+{
+  "vehicles": [
+    {
+      "name": "My Car",
+      "category": "known",
+      "notes": "Confirmed from driveway arrival.",
+      "sensor_ids": ["12345678", "23456789", "34567890", "45678901"]
+    },
+    {
+      "name": "Possible delivery vehicle",
+      "category": "watch",
+      "notes": "Recurring midday cluster, not yet confirmed.",
+      "sensor_ids": ["aabbccdd", "bbccddee"]
+    },
+    {
+      "name": "Road noise",
+      "category": "ignore",
+      "notes": "Uninteresting recurring drive-by.",
+      "sensor_ids": ["99999999"]
+    }
+  ]
+}
