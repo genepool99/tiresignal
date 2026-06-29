@@ -6,9 +6,8 @@ from tpms_config import (
     LOG_PATH,
     MAX_CANDIDATE_SENSOR_COUNT,
     PASS_WINDOW_SECONDS,
-    REFRESH_WEBHOOK_ID,
     REPORT_PATH,
-    VEHICLE_MAP_EDIT_WEBHOOK_ID,
+    SERVICE_PORT,
     VEHICLE_MAP_PATH,
 )
 from utils import category_label, display_dt, display_time, safe_text
@@ -1571,8 +1570,9 @@ def html_end(timeline_points, daily_counts, hourly_counts):
 
   <script>
     const allTimelinePoints = {json.dumps(timeline_points)};
-    const refreshWebhookUrl = "/api/webhook/{safe_text(REFRESH_WEBHOOK_ID)}";
-    const vehicleMapEditWebhookUrl = "/api/webhook/{safe_text(VEHICLE_MAP_EDIT_WEBHOOK_ID)}";
+    const serviceBaseUrl = `http://${{window.location.hostname}}:{safe_text(SERVICE_PORT)}`;
+    const refreshWebhookUrl = `${{serviceBaseUrl}}/refresh`;
+    const vehicleMapEditWebhookUrl = `${{serviceBaseUrl}}/vehicle-map-edit`;
     const PRESSURE_SUSPICIOUS_PSI = 120;
     const MAX_SCATTER_POINTS = 5000;
 

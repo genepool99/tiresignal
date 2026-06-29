@@ -6,6 +6,13 @@ def env_path(name: str, default: str) -> Path:
     return Path(os.environ.get(name, default))
 
 
+def env_int(name: str, default: int) -> int:
+    try:
+        return int(os.environ.get(name, str(default)))
+    except ValueError:
+        return default
+
+
 LOG_PATH = env_path("TPMS_LOG_PATH", "/config/rtl_433/logs/rtl_433.jsonl")
 
 BASE_DIR = env_path("TPMS_BASE_DIR", "/config/rtl_433/tpms_analyzer")
@@ -24,6 +31,8 @@ UNKNOWN_MULTI_SENSOR_RETENTION_DAYS = 180
 
 # Never prune events tied to known/watch/ignore vehicles.
 PRESERVE_LABELED_SENSOR_EVENTS = True
+
+SERVICE_PORT = env_int("TPMS_SERVICE_PORT", 8099)
 
 # Home Assistant serves /config/www as /local
 REPORT_PATH = env_path("TPMS_REPORT_PATH", "/config/www/rtl_433/tpms_report.html")
