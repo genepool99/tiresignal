@@ -1482,6 +1482,7 @@ def html_end(timeline_points, daily_counts, hourly_counts):
     const refreshWebhookUrl = "/api/webhook/{safe_text(REFRESH_WEBHOOK_ID)}";
     const vehicleMapEditWebhookUrl = "/api/webhook/tpms-vehicle-map-edit-b8f41c6a9e73";
     const PRESSURE_SUSPICIOUS_PSI = 120;
+    const MAX_SCATTER_POINTS = 5000;
 
     async function refreshReport() {{
       const button = document.getElementById("refreshButton");
@@ -1838,6 +1839,35 @@ def html_end(timeline_points, daily_counts, hourly_counts):
       return Number.isFinite(number) ? number : null;
     }}
 
+    function downsampleRows(rows, maxPoints = MAX_SCATTER_POINTS) {{
+      if (!Array.isArray(rows) || rows.length <= maxPoints) return rows;
+      if (maxPoints <= 0) return [];
+
+      const step = rows.length / maxPoints;
+      const sampled = [];
+
+      for (let index = 0; index < maxPoints; index += 1) {{
+        sampled.push(rows[Math.floor(index * step)]);
+      }}
+
+      return sampled;
+    }}
+
+    function samplingNote(sampledCount, totalCount) {{
+      if (totalCount <= sampledCount) return "";
+      return `Showing ${{sampledCount.toLocaleString()}} of ${{totalCount.toLocaleString()}} points for performance.`;
+    }}
+
+    function chartTitleWithSampling(title, notes) {{
+      const note = notes.filter(Boolean).join(" ");
+      return note ? `${{title}}<br><sup>${{note}}</sup>` : title;
+    }}
+
+    function pressurePointSamplingNote(label, sampledCount, totalCount) {{
+      if (totalCount <= sampledCount) return "";
+      return `${{label}}: showing ${{sampledCount.toLocaleString()}} of ${{totalCount.toLocaleString()}} points.`;
+    }}
+
     function pressurePointValue(point) {{
       const pressurePsi = numericValue(point.pressure_psi);
 
@@ -1965,21 +1995,26 @@ def html_end(timeline_points, daily_counts, hourly_counts):
         }}));
     }}
 
-    function maybeBatteryTraces(points) {{
+    function maybeBatteryTraceRows(points) {{
+      return points
+        .map(point => ({{
+          point,
+          value: numericValue(point.maybe_battery)
+        }}))
+        .filter(row => row.value !== null);
+    }}
+
+    function maybeBatteryTraces(rows) {{
       const byModel = new Map();
 
-      points.forEach(point => {{
-        const value = numericValue(point.maybe_battery);
-
-        if (value === null) return;
-
-        const model = categoryValue(point.model);
+      rows.forEach(row => {{
+        const model = categoryValue(row.point.model);
 
         if (!byModel.has(model)) {{
           byModel.set(model, []);
         }}
 
-        byModel.get(model).push({{ point, value }});
+        byModel.get(model).push(row);
       }});
 
       return Array.from(byModel.entries())
@@ -1996,11 +2031,7 @@ def html_end(timeline_points, daily_counts, hourly_counts):
         }}));
     }}
 
-    function metricTrace(name, points, field) {{
-      const rows = points
-        .map(point => ({{ point, value: numericValue(point[field]) }}))
-        .filter(row => row.value !== null);
-
+    function metricTrace(name, rows) {{
       if (rows.length < 2) {{
         return null;
       }}
@@ -2014,6 +2045,12 @@ def html_end(timeline_points, daily_counts, hourly_counts):
         text: rows.map(row => `${{row.point.sensor_id || "Unknown"}} ${{name}}`),
         marker: {{ size: 7 }}
       }};
+    }}
+
+    function metricRows(points, field) {{
+      return points
+        .map(point => ({{ point, value: numericValue(point[field]) }}))
+        .filter(row => row.value !== null);
     }}
 
     function emptyChart(chartId, title, message, yAxisTitle = "") {{
@@ -2107,18 +2144,22 @@ def html_end(timeline_points, daily_counts, hourly_counts):
       }}
 
       renderChartSafely("timelineChart", "TPMS detections by sensor ID", "TPMS Sensor ID", () => {{
+        const timelineRows = downsampleRows(points);
+
         Plotly.newPlot("timelineChart", [{{
-          x: points.map(point => point.time),
-          y: points.map(point => point.sensor_id),
+          x: timelineRows.map(point => point.time),
+          y: timelineRows.map(point => point.sensor_id),
           mode: "markers",
           type: "scatter",
-          text: points.map(point => `${{point.sensor_id}} ${{point.model || ""}}`),
+          text: timelineRows.map(point => `${{point.sensor_id}} ${{point.model || ""}}`),
           marker: {{ size: 7 }}
         }}], {{
-          title: "TPMS detections by sensor ID",
+          title: chartTitleWithSampling("TPMS detections by sensor ID", [
+            samplingNote(timelineRows.length, points.length)
+          ]),
           xaxis: {{ title: "Time" }},
           yaxis: {{ title: "TPMS Sensor ID", type: "category" }},
-          margin: {{ l: 170, r: 30, t: 50, b: 60 }}
+          margin: {{ l: 170, r: 30, t: 70, b: 60 }}
         }});
       }});
 
@@ -2168,21 +2209,29 @@ def html_end(timeline_points, daily_counts, hourly_counts):
 
         if (pressurePoints.length) {{
           const pressureTraces = [];
+          const sampledNormalPressurePoints = downsampleRows(normalPressurePoints);
+          const sampledSuspiciousPressurePoints = downsampleRows(suspiciousPressurePoints);
+          const pressureSamplingNotes = [
+            pressurePointSamplingNote("Normal", sampledNormalPressurePoints.length, normalPressurePoints.length)
+          ];
 
           if (normalPressurePoints.length) {{
-            pressureTraces.push(pressureTrace("Pressure", normalPressurePoints));
+            pressureTraces.push(pressureTrace("Pressure", sampledNormalPressurePoints));
           }}
 
           if (showSuspiciousPressure && suspiciousPressurePoints.length) {{
-            pressureTraces.push(pressureTrace("Suspicious pressure", suspiciousPressurePoints, true));
+            pressureTraces.push(pressureTrace("Suspicious pressure", sampledSuspiciousPressurePoints, true));
+            pressureSamplingNotes.push(
+              pressurePointSamplingNote("Suspicious", sampledSuspiciousPressurePoints.length, suspiciousPressurePoints.length)
+            );
           }}
 
           if (pressureTraces.length) {{
             Plotly.newPlot("pressureChart", pressureTraces, {{
-              title: "TPMS pressure values, normalized to PSI",
+              title: chartTitleWithSampling("TPMS pressure values, normalized to PSI", pressureSamplingNotes),
               xaxis: {{ title: "Time" }},
               yaxis: {{ title: "Pressure (PSI)" }},
-              margin: {{ l: 80, r: 30, t: 50, b: 60 }}
+              margin: {{ l: 80, r: 30, t: 70, b: 60 }}
             }});
           }} else {{
             emptyChart("pressureChart", "TPMS pressure values, normalized to PSI", "Only suspicious pressure points in this time range", "Pressure (PSI)");
@@ -2201,20 +2250,24 @@ def html_end(timeline_points, daily_counts, hourly_counts):
           .filter(row => row.value !== null);
 
         if (temperaturePoints.length >= 2) {{
+          const sampledTemperaturePoints = downsampleRows(temperaturePoints);
+
           Plotly.newPlot("temperatureChart", [{{
             name: "Temperature",
-            x: temperaturePoints.map(row => row.point.time),
-            y: temperaturePoints.map(row => row.value),
+            x: sampledTemperaturePoints.map(row => row.point.time),
+            y: sampledTemperaturePoints.map(row => row.value),
             mode: "markers",
             type: "scatter",
-            text: temperaturePoints.map(row => `${{row.point.sensor_id || "Unknown"}}<br>${{row.point.model || "Unknown"}}<br>Protocol: ${{row.point.protocol || "Unknown"}}<br>Temperature C: ${{row.value.toFixed(1)}}`),
+            text: sampledTemperaturePoints.map(row => `${{row.point.sensor_id || "Unknown"}}<br>${{row.point.model || "Unknown"}}<br>Protocol: ${{row.point.protocol || "Unknown"}}<br>Temperature C: ${{row.value.toFixed(1)}}`),
             hovertemplate: "%{{text}}<extra></extra>",
             marker: {{ size: 5 }}
           }}], {{
-            title: "TPMS temperature values",
+            title: chartTitleWithSampling("TPMS temperature values", [
+              samplingNote(sampledTemperaturePoints.length, temperaturePoints.length)
+            ]),
             xaxis: {{ title: "Time" }},
             yaxis: {{ title: "Temperature (°C)" }},
-            margin: {{ l: 80, r: 30, t: 50, b: 60 }}
+            margin: {{ l: 80, r: 30, t: 70, b: 60 }}
           }});
         }} else {{
           emptyChart("temperatureChart", "TPMS temperature values", "Not enough temperature data for this time range", "Temperature (°C)");
@@ -2244,17 +2297,18 @@ def html_end(timeline_points, daily_counts, hourly_counts):
       }});
 
       renderChartSafely("maybeBatteryChart", "Unconfirmed battery signal", "maybe_battery raw value", () => {{
-        const maybeBatteryPointCount = points
-          .map(point => numericValue(point.maybe_battery))
-          .filter(value => value !== null).length;
-        const maybeBatteryRows = maybeBatteryTraces(points);
+        const maybeBatteryRows = maybeBatteryTraceRows(points);
+        const sampledMaybeBatteryRows = downsampleRows(maybeBatteryRows);
+        const maybeBatteryTracesForPlot = maybeBatteryTraces(sampledMaybeBatteryRows);
 
-        if (maybeBatteryPointCount >= 2 && maybeBatteryRows.length) {{
-          Plotly.newPlot("maybeBatteryChart", maybeBatteryRows, {{
-            title: "Unconfirmed battery signal",
+        if (maybeBatteryRows.length >= 2 && maybeBatteryTracesForPlot.length) {{
+          Plotly.newPlot("maybeBatteryChart", maybeBatteryTracesForPlot, {{
+            title: chartTitleWithSampling("Unconfirmed battery signal", [
+              samplingNote(sampledMaybeBatteryRows.length, maybeBatteryRows.length)
+            ]),
             xaxis: {{ title: "Time" }},
             yaxis: {{ title: "maybe_battery raw value" }},
-            margin: {{ l: 80, r: 30, t: 50, b: 60 }}
+            margin: {{ l: 80, r: 30, t: 70, b: 60 }}
           }});
         }} else {{
           emptyChart("maybeBatteryChart", "Unconfirmed battery signal", "Not enough maybe_battery data for this time range", "maybe_battery raw value");
@@ -2262,18 +2316,31 @@ def html_end(timeline_points, daily_counts, hourly_counts):
       }});
 
       renderChartSafely("signalChart", "TPMS signal quality", "Signal value", () => {{
-        const signalTraces = [
-          metricTrace("RSSI", points, "rssi"),
-          metricTrace("SNR", points, "snr"),
-          metricTrace("Noise", points, "noise")
-        ].filter(Boolean);
+        const signalRows = [
+          ["RSSI", metricRows(points, "rssi")],
+          ["SNR", metricRows(points, "snr")],
+          ["Noise", metricRows(points, "noise")]
+        ];
+        const signalSamplingNotes = [];
+        const signalTraces = signalRows
+          .map(([name, rows]) => {{
+            const sampledRows = downsampleRows(rows);
+            const note = pressurePointSamplingNote(name, sampledRows.length, rows.length);
+
+            if (note) {{
+              signalSamplingNotes.push(note);
+            }}
+
+            return metricTrace(name, sampledRows);
+          }})
+          .filter(Boolean);
 
         if (signalTraces.length) {{
           Plotly.newPlot("signalChart", signalTraces, {{
-            title: "TPMS signal quality",
+            title: chartTitleWithSampling("TPMS signal quality", signalSamplingNotes),
             xaxis: {{ title: "Time" }},
             yaxis: {{ title: "Signal value" }},
-            margin: {{ l: 80, r: 30, t: 50, b: 60 }}
+            margin: {{ l: 80, r: 30, t: 70, b: 60 }}
           }});
         }} else {{
           emptyChart("signalChart", "TPMS signal quality", "Not enough signal data for this time range", "Signal value");
