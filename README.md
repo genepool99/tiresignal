@@ -38,12 +38,6 @@ Install the `rtl_433` add-on from that repository, then configure `rtl_433` to w
 /config/rtl_433/logs/rtl_433.jsonl
 ```
 
-Example `rtl_433` output line:
-
-```text
-output json:/config/rtl_433/logs/rtl_433.jsonl
-```
-
 The TPMS Analyzer add-on `log_path` option must match the `rtl_433` output path.
 
 ## Install
