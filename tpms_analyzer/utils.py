@@ -1,6 +1,8 @@
 from datetime import datetime, timezone
 from html import escape
 
+from tpms_config import STRONG_SENSOR_COUNT, VERY_STRONG_PASS_COUNT
+
 
 def parse_time(value):
     if not value:
@@ -74,8 +76,11 @@ def normalize_sensor_id(value):
 
 
 def confidence_label(sensor_count, pass_count):
-    if sensor_count >= 4 and pass_count >= 2:
+    if sensor_count >= STRONG_SENSOR_COUNT and pass_count >= VERY_STRONG_PASS_COUNT:
         return "Very strong"
+
+    if sensor_count >= STRONG_SENSOR_COUNT and pass_count >= 2:
+        return "Strong"
 
     if sensor_count >= 3 and pass_count >= 2:
         return "Strong"

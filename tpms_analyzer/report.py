@@ -5,9 +5,12 @@ from tpms_config import (
     DB_PATH,
     LOG_PATH,
     MAX_CANDIDATE_SENSOR_COUNT,
+    MIN_REPEAT_CLUSTER_COUNT,
     PASS_WINDOW_SECONDS,
     REPORT_PATH,
+    STRONG_SENSOR_COUNT,
     VEHICLE_MAP_PATH,
+    VERY_STRONG_PASS_COUNT,
 )
 from utils import category_label, display_dt, display_time, safe_text
 
@@ -775,9 +778,11 @@ def html_start(generated_at):
   <main>
     <div class="note">
       <strong>Last successful run:</strong> {safe_text(generated_at)}<br>
-      <strong>Busy road mode is enabled.</strong>
-      Pass grouping uses a short {PASS_WINDOW_SECONDS}-second window to avoid merging nearby traffic.
-      Focus on known vehicles, watchlist vehicles, and repeat overlap candidates.
+      Readings within <strong>{PASS_WINDOW_SECONDS} seconds</strong> of each other are grouped into a single vehicle pass.
+      Candidate sensor groups must repeat across at least <strong>{MIN_REPEAT_CLUSTER_COUNT} separate passes</strong> before they appear in the tables below.
+      Groups larger than <strong>{MAX_CANDIDATE_SENSOR_COUNT} sensors</strong> are excluded to reduce road-noise clusters.
+      <strong>Very strong</strong> confidence requires at least <strong>{STRONG_SENSOR_COUNT} sensors</strong> repeating across <strong>{VERY_STRONG_PASS_COUNT} separate passes</strong>.
+      The report focuses on known vehicles, watchlist vehicles, and qualifying repeat candidate groups.
     </div>
 """
 
@@ -1151,12 +1156,105 @@ def overlap_candidates_section(rows):
             <th>First Seen</th>
             <th>Last Seen</th>
             <th>Sensor IDs</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
 """
 
-    for row in rows:
+    for index, row in enumerate(rows, start=1):
+        sensor_ids = row["sensor_ids"]
+        known_vehicle = row["known_vehicle"]
+        category = row["category"] or ""
+
+        if known_vehicle:
+            known_payload = {
+                "action": "update_category",
+                "name": known_vehicle,
+                "category": "known",
+                "notes": "",
+                "sensor_ids": sensor_ids,
+            }
+            watch_payload = {
+                "action": "update_category",
+                "name": known_vehicle,
+                "category": "watch",
+                "notes": "",
+                "sensor_ids": sensor_ids,
+            }
+            ignore_payload = {
+                "action": "update_category",
+                "name": known_vehicle,
+                "category": "ignore",
+                "notes": "",
+                "sensor_ids": sensor_ids,
+            }
+            action_buttons = ""
+            if category != "known":
+                action_buttons += f"""
+                <button
+                  type="button"
+                  class="small-action-button known-action"
+                  data-payload="{safe_text(json.dumps(known_payload))}"
+                  onclick="editVehicleMapFromButton(this)"
+                >
+                  Move to Known
+                </button>"""
+            if category != "watch":
+                action_buttons += f"""
+                <button
+                  type="button"
+                  class="small-action-button watch-action"
+                  data-payload="{safe_text(json.dumps(watch_payload))}"
+                  onclick="editVehicleMapFromButton(this)"
+                >
+                  Move to Watch
+                </button>"""
+            if category != "ignore":
+                action_buttons += f"""
+                <button
+                  type="button"
+                  class="small-action-button ignore-action"
+                  data-payload="{safe_text(json.dumps(ignore_payload))}"
+                  onclick="editVehicleMapFromButton(this)"
+                >
+                  Ignore
+                </button>"""
+        else:
+            candidate_name = f"Unknown Candidate {index}"
+            candidate_notes = f"Pass count: {row['pass_count']}"
+            watch_payload = {
+                "action": "add",
+                "name": candidate_name,
+                "category": "watch",
+                "notes": candidate_notes,
+                "sensor_ids": sensor_ids,
+            }
+            ignore_payload = {
+                "action": "add",
+                "name": candidate_name,
+                "category": "ignore",
+                "notes": candidate_notes,
+                "sensor_ids": sensor_ids,
+            }
+            action_buttons = f"""
+                <button
+                  type="button"
+                  class="small-action-button watch-action"
+                  data-payload="{safe_text(json.dumps(watch_payload))}"
+                  onclick="editVehicleMapFromButton(this)"
+                >
+                  Add Watch
+                </button>
+                <button
+                  type="button"
+                  class="small-action-button ignore-action"
+                  data-payload="{safe_text(json.dumps(ignore_payload))}"
+                  onclick="editVehicleMapFromButton(this)"
+                >
+                  Ignore
+                </button>"""
+
         html += f"""
           <tr>
             <td>{vehicle_status_html(row["known_vehicle"], row["category"])}</td>
@@ -1168,6 +1266,10 @@ def overlap_candidates_section(rows):
             <td>{display_time(row["first_seen"])}</td>
             <td>{display_time(row["last_seen"])}</td>
             <td>{safe_text(", ".join(row["sensor_ids"]))}</td>
+            <td>
+              <div class="action-buttons">{action_buttons}
+              </div>
+            </td>
           </tr>
 """
 
@@ -1205,12 +1307,105 @@ def exact_candidates_section(rows):
             <th>First Seen</th>
             <th>Last Seen</th>
             <th>Sensor IDs</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
 """
 
-    for row in rows:
+    for index, row in enumerate(rows, start=1):
+        sensor_ids = row["sensor_ids"]
+        known_vehicle = row["known_vehicle"]
+        category = row["category"] or ""
+
+        if known_vehicle:
+            known_payload = {
+                "action": "update_category",
+                "name": known_vehicle,
+                "category": "known",
+                "notes": "",
+                "sensor_ids": sensor_ids,
+            }
+            watch_payload = {
+                "action": "update_category",
+                "name": known_vehicle,
+                "category": "watch",
+                "notes": "",
+                "sensor_ids": sensor_ids,
+            }
+            ignore_payload = {
+                "action": "update_category",
+                "name": known_vehicle,
+                "category": "ignore",
+                "notes": "",
+                "sensor_ids": sensor_ids,
+            }
+            action_buttons = ""
+            if category != "known":
+                action_buttons += f"""
+                <button
+                  type="button"
+                  class="small-action-button known-action"
+                  data-payload="{safe_text(json.dumps(known_payload))}"
+                  onclick="editVehicleMapFromButton(this)"
+                >
+                  Move to Known
+                </button>"""
+            if category != "watch":
+                action_buttons += f"""
+                <button
+                  type="button"
+                  class="small-action-button watch-action"
+                  data-payload="{safe_text(json.dumps(watch_payload))}"
+                  onclick="editVehicleMapFromButton(this)"
+                >
+                  Move to Watch
+                </button>"""
+            if category != "ignore":
+                action_buttons += f"""
+                <button
+                  type="button"
+                  class="small-action-button ignore-action"
+                  data-payload="{safe_text(json.dumps(ignore_payload))}"
+                  onclick="editVehicleMapFromButton(this)"
+                >
+                  Ignore
+                </button>"""
+        else:
+            candidate_name = f"Exact Repeat Candidate {index}"
+            candidate_notes = f"Pass count: {row['pass_count']}"
+            watch_payload = {
+                "action": "add",
+                "name": candidate_name,
+                "category": "watch",
+                "notes": candidate_notes,
+                "sensor_ids": sensor_ids,
+            }
+            ignore_payload = {
+                "action": "add",
+                "name": candidate_name,
+                "category": "ignore",
+                "notes": candidate_notes,
+                "sensor_ids": sensor_ids,
+            }
+            action_buttons = f"""
+                <button
+                  type="button"
+                  class="small-action-button watch-action"
+                  data-payload="{safe_text(json.dumps(watch_payload))}"
+                  onclick="editVehicleMapFromButton(this)"
+                >
+                  Add Watch
+                </button>
+                <button
+                  type="button"
+                  class="small-action-button ignore-action"
+                  data-payload="{safe_text(json.dumps(ignore_payload))}"
+                  onclick="editVehicleMapFromButton(this)"
+                >
+                  Ignore
+                </button>"""
+
         html += f"""
           <tr>
             <td>{vehicle_status_html(row["known_vehicle"], row["category"])}</td>
@@ -1222,6 +1417,10 @@ def exact_candidates_section(rows):
             <td>{display_time(row["first_seen"])}</td>
             <td>{display_time(row["last_seen"])}</td>
             <td>{safe_text(", ".join(row["sensor_ids"]))}</td>
+            <td>
+              <div class="action-buttons">{action_buttons}
+              </div>
+            </td>
           </tr>
 """
 
