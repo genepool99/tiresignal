@@ -32,10 +32,11 @@ Install and start `rtl_433` before using TPMS Analyzer. In Home Assistant, one c
 https://github.com/pbkhrv/rtl_433-hass-addons
 ```
 
-Install the `rtl_433` add-on from that repository, then configure `rtl_433` to write JSON output to:
+Install the `rtl_433` add-on from that repository, then configure `rtl_433` to use customary units and write JSON output. `convert customary` is recommended so TPMS pressure values are reported in customary units such as PSI.
 
 ```text
-/config/rtl_433/logs/rtl_433.jsonl
+convert customary
+output json:/config/rtl_433/logs/rtl_433.jsonl
 ```
 
 The TPMS Analyzer add-on `log_path` option must match the `rtl_433` output path.
