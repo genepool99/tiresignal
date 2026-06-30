@@ -12,8 +12,15 @@ arch:
 startup: application
 boot: manual
 init: false
+ingress: true
+ingress_port: 8099
+panel_icon: mdi:car-tire-alert
+panel_title: TPMS Analyzer
+panel_admin: true
 ports:
   8099/tcp: 8099
+ports_description:
+  8099/tcp: Direct web UI access
 map:
   - config:rw
 options:
