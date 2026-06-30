@@ -24,6 +24,8 @@ TPMS Analyzer does not receive radio traffic directly. It reads TPMS events from
 
 Install and start `rtl_433` before using TPMS Analyzer. In Home Assistant, one common option is the `rtl_433` add-on repository:
 
+[![Open your Home Assistant instance and add the rtl_433 add-on repository.](https://my.home-assistant.io/badges/supervisor_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_addon_repository/?repository_url=https://github.com/pbkhrv/rtl_433-hass-addons)
+
 ```text
 https://github.com/pbkhrv/rtl_433-hass-addons
 ```
@@ -45,6 +47,8 @@ The TPMS Analyzer add-on `log_path` option must match the `rtl_433` output path.
 ## Install
 
 1. Add this repository to the Home Assistant Add-on Store:
+
+   [![Open your Home Assistant instance and add this add-on repository.](https://my.home-assistant.io/badges/supervisor_addon_repository.svg)](https://my.home-assistant.io/redirect/supervisor_addon_repository/?repository_url=https://github.com/genepool99/tpms_analyzer)
 
    ```text
    https://github.com/genepool99/tpms_analyzer
