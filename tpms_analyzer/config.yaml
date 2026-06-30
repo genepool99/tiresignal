@@ -1,5 +1,5 @@
 name: TPMS Analyzer
-version: "0.3.4.1"
+version: "0.3.4.2"
 slug: tpms_analyzer
 description: Analyzes rtl_433 TPMS sensor data and generates an HTML report.
 url: https://github.com/genepool99/tpms_analyzer

@@ -634,6 +634,43 @@ def html_start(generated_at):
       margin: 12px 0;
     }}
 
+    .matching-summary {{
+      margin-top: 8px;
+    }}
+
+    .matching-summary-title {{
+      font-weight: 600;
+      margin-bottom: 8px;
+    }}
+
+    .matching-summary-grid {{
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 10px;
+    }}
+
+    .matching-summary-item {{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      text-align: center;
+    }}
+
+    .matching-summary-value {{
+      display: block;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1.2;
+    }}
+
+    .matching-summary-label {{
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }}
+
     .copybox {{
       font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
       white-space: pre-wrap;
@@ -777,10 +814,29 @@ def html_start(generated_at):
 
   <main>
     <div class="note">
-      <strong>Last successful run:</strong> {safe_text(generated_at)}<br>
-      <strong>How matching works:</strong>
-      {PASS_WINDOW_SECONDS}s pass window · {MIN_REPEAT_CLUSTER_COUNT} repeat passes required · Max {MAX_CANDIDATE_SENSOR_COUNT} sensors/group · Very strong = {STRONG_SENSOR_COUNT} sensors across {VERY_STRONG_PASS_COUNT} passes<br>
-      Focused on known vehicles, watchlist vehicles, and repeat candidate groups.
+      <strong>Last successful run:</strong> {safe_text(generated_at)}
+      <div class="matching-summary">
+        <div class="matching-summary-title">How matching works</div>
+        <div class="matching-summary-grid">
+          <div class="matching-summary-item">
+            <span class="matching-summary-value">{PASS_WINDOW_SECONDS}s</span>
+            <span class="matching-summary-label">Pass window</span>
+          </div>
+          <div class="matching-summary-item">
+            <span class="matching-summary-value">{MIN_REPEAT_CLUSTER_COUNT}</span>
+            <span class="matching-summary-label">Repeat passes required</span>
+          </div>
+          <div class="matching-summary-item">
+            <span class="matching-summary-value">{MAX_CANDIDATE_SENSOR_COUNT}</span>
+            <span class="matching-summary-label">Max sensors/group</span>
+          </div>
+          <div class="matching-summary-item">
+            <span class="matching-summary-value">{STRONG_SENSOR_COUNT} \xd7 {VERY_STRONG_PASS_COUNT}</span>
+            <span class="matching-summary-label">Very strong threshold</span>
+          </div>
+        </div>
+      </div>
+      <span class="muted">Focused on known vehicles, watchlist vehicles, and repeat candidate groups.</span>
     </div>
 """
 
