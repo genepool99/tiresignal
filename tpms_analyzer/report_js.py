@@ -157,12 +157,10 @@ JS_BLOCK = """    function getServiceBaseUrl() {
     function closeVehicleEditModal() {
       const modal = document.getElementById("vehicleEditModal");
 
-      if (modal.contains(document.activeElement)) {
-        if (_vehicleEditPendingButton) {
-          _vehicleEditPendingButton.focus();
-        } else {
-          document.activeElement.blur();
-        }
+      if (_vehicleEditPendingButton) {
+        _vehicleEditPendingButton.focus();
+      } else if (modal.contains(document.activeElement)) {
+        document.activeElement.blur();
       }
 
       modal.classList.remove("open");
