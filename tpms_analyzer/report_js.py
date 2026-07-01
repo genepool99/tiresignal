@@ -2,6 +2,16 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       if (window.location.pathname.startsWith("/local/")) {
         return window.location.protocol + "//" + window.location.hostname + ":8099";
       }
+
+      if (window.location.port === "8099") {
+        return "";
+      }
+
+      const parts = window.location.pathname.split("/").filter(Boolean);
+      if (parts.length > 0) {
+        return "/" + parts[0];
+      }
+
       return "";
     }
 
