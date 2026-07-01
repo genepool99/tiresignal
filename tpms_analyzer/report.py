@@ -795,6 +795,62 @@ def html_start(generated_at):
       background: var(--ignore-bg);
       color: var(--ignore-text);
     }}
+
+    .candidate-drawer {{
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      display: none;
+      align-items: flex-start;
+      justify-content: flex-end;
+    }}
+
+    .candidate-drawer.open {{
+      display: flex;
+    }}
+
+    .candidate-drawer-backdrop {{
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+    }}
+
+    .candidate-drawer-panel {{
+      position: relative;
+      width: 380px;
+      max-width: 92vw;
+      height: 100vh;
+      overflow-y: auto;
+      background: var(--card);
+      border-left: 1px solid var(--border);
+      padding: 20px;
+      box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
+      box-sizing: border-box;
+    }}
+
+    .candidate-drawer-header {{
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 16px;
+    }}
+
+    .candidate-drawer-close {{
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 800;
+      padding: 4px 10px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }}
+
+    .candidate-drawer-close:hover {{
+      background: var(--border);
+    }}
   </style>
 </head>
 <body>
@@ -1848,6 +1904,20 @@ def import_stats_section(stats, prune_stats):
 
 def html_end(timeline_points, daily_counts, hourly_counts):
     return f"""
+  <div id="candidateDrawer" class="candidate-drawer"
+       role="dialog" aria-modal="true"
+       aria-hidden="true" aria-labelledby="candidateDrawerTitle">
+    <div class="candidate-drawer-backdrop" onclick="closeCandidateDrawer()"></div>
+    <div class="candidate-drawer-panel">
+      <div class="candidate-drawer-header">
+        <strong id="candidateDrawerTitle">Candidate details</strong>
+        <button type="button" class="candidate-drawer-close"
+                onclick="closeCandidateDrawer()">&#x2715; Close</button>
+      </div>
+      <div id="candidateDrawerBody"></div>
+    </div>
+  </div>
+
   </main>
 
   <script>
@@ -1923,6 +1993,69 @@ def html_end(timeline_points, daily_counts, hourly_counts):
           button.disabled = false;
         }}, 4000);
       }}
+    }}
+
+    function escHtml(value) {{
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }}
+
+    function openCandidateDrawer(button) {{
+      const candidate = JSON.parse(button.dataset.candidate || "{{}}");
+      const drawer = document.getElementById("candidateDrawer");
+      const titleEl = document.getElementById("candidateDrawerTitle");
+      const bodyEl = document.getElementById("candidateDrawerBody");
+
+      titleEl.textContent = candidate.title || "Candidate details";
+      bodyEl.innerHTML = renderCandidateDrawer(candidate);
+
+      drawer.classList.add("open");
+      drawer.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onCandidateDrawerKeydown);
+    }}
+
+    function closeCandidateDrawer() {{
+      const drawer = document.getElementById("candidateDrawer");
+      drawer.classList.remove("open");
+      drawer.setAttribute("aria-hidden", "true");
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onCandidateDrawerKeydown);
+    }}
+
+    function onCandidateDrawerKeydown(event) {{
+      if (event.key === "Escape") closeCandidateDrawer();
+    }}
+
+    function renderCandidateDrawer(c) {{
+      const sensorIds = Array.isArray(c.sensor_ids) ? c.sensor_ids : [];
+      let html = "";
+
+      html += `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:12px;">`;
+      if (c.confidence) html += `<span class="pill info">${{escHtml(c.confidence)}}</span>`;
+      if (c.category) html += `<span class="pill ${{escHtml(c.category)}}">${{escHtml(c.category)}}</span>`;
+      if (c.known_vehicle) html += `<span style="font-weight:600;">${{escHtml(c.known_vehicle)}}</span>`;
+      html += `</div>`;
+
+      html += `<div class="matching-summary-grid" style="margin-bottom:12px;">`;
+      html += `<div class="matching-summary-item"><span class="matching-summary-value">${{escHtml(c.sensor_count ?? "")}}</span><span class="matching-summary-label">Sensors</span></div>`;
+      html += `<div class="matching-summary-item"><span class="matching-summary-value">${{escHtml(c.pass_count ?? "")}}</span><span class="matching-summary-label">Passes</span></div>`;
+      html += `</div>`;
+
+      html += `<div class="chart-inline-note">First seen: ${{escHtml(c.first_seen || "—")}}</div>`;
+      html += `<div class="chart-inline-note">Last seen: ${{escHtml(c.last_seen || "—")}}</div>`;
+
+      if (c.match_text) html += `<div class="chart-inline-note" style="margin-top:8px;">Known match: ${{escHtml(c.match_text)}}</div>`;
+
+      if (sensorIds.length > 0) {{
+        html += `<div class="chart-inline-note" style="margin-top:8px;">Sensor IDs: ${{escHtml(sensorIds.join(", "))}}</div>`;
+      }}
+
+      return html;
     }}
 
     function filterTable(tableId, query) {{
