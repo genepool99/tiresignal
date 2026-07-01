@@ -1420,10 +1420,7 @@ def overlap_candidates_section(rows):
             <td>{vehicle_status_html(row["known_vehicle"], row["category"])}</td>
             <td>{pill(category_label(row["category"] or "unknown"), row["category"] or "unknown")}</td>
             <td>{safe_text(known_match_text(row["known_match"]))}</td>
-            <td title="{row['sensor_count']} sensors · {row['pass_count']} passes">
-              {pill(row["confidence"], "info")}
-              <div class="chart-inline-note">{row['sensor_count']} sensors · {row['pass_count']} passes</div>
-            </td>
+            <td title="{row['sensor_count']} sensors · {row['pass_count']} passes">{pill(row["confidence"], "info")}</td>
             <td>{row["pass_count"]}</td>
             <td>{row["sensor_count"]}</td>
             <td>{display_time(row["first_seen"])}</td>
