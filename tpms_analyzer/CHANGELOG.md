@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.3.6
+
+### Added
+
+- Row action menus (`⋮`) for saved vehicles and candidate rows, replacing clusters of inline action buttons with a consistent Actions column.
+- Edit and Delete actions for ignored vehicles.
+- A visible report version in the report header.
+- A "Mixed sensor types" signal on candidate rows when sensors in a group show more than one observed model or protocol. This is an explainability warning only and does not change confidence scoring.
+- Hover and screen-reader descriptions for confidence, signal/pattern, and vehicle status pills.
+- Visible error messages for failed direct vehicle-map actions.
+
+### Changed
+
+- Candidate tables now separate Confidence from Signals so behavior/caution tags no longer share the confidence cell.
+- Best Guess and Exact Repeat candidate tables now use a clearer "Saved Match" column instead of separate Known Name, Category, and Known Match columns.
+- Saved vehicle, ignored vehicle, and candidate row actions now live at the far-right end of each table row.
+- Vehicle edit modal focus handling now restores focus more reliably after closing.
+- Candidate Details drawer now closes any open row action menu before opening.
+- Pill spacing was improved for stacked or wrapped tags.
+
 ## 0.3.5
 
 ### Added

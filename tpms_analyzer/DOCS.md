@@ -49,6 +49,7 @@ These options are safe to leave at their defaults for most installs.
 * Open TPMS Analyzer from the Home Assistant sidebar or click **Open Web UI** on the add-on page.
 * Click **Refresh** in the report for manual analysis.
 * Use the report vehicle-labeling controls to add or update sensor labels.
+* Review the Candidates tab to identify unknown or repeated sensor groups. Use the row action menu (`⋮`) on each row to add a candidate to the watch list, ignore it, move a saved match, or inspect details when available.
 * Leave scheduled refresh enabled to refresh the report daily.
 
 ## Endpoints

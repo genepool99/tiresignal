@@ -87,6 +87,7 @@ These options are safe to leave at their defaults for most installs.
 * Open the report from the Home Assistant sidebar or **Open Web UI**.
 * Click **Refresh** in the report to rerun analysis.
 * Use the report labeling controls to add sensors to the vehicle map.
+* Review the **Candidates** tab to identify unknown or repeated sensor groups. Use the row action menu (`⋮`) on each row to label, ignore, move, or inspect candidates. Mixed sensor type warnings are informational only and do not affect scoring.
 * Leave scheduled refresh enabled to refresh the report daily.
 * Direct access is available on port `8099` when exposed by the add-on configuration.
 
