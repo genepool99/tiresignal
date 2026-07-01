@@ -44,7 +44,7 @@ JS_BLOCK = """    function getServiceBaseUrl() {
     async function editVehicleMapFromButton(button) {
       const payload = JSON.parse(button.dataset.payload || "{}");
 
-      if (payload.action === "add") {
+      if (payload.action === "add" || payload.action === "edit") {
         openVehicleEditModal(button, payload);
         return;
       }
@@ -52,12 +52,18 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       await submitVehicleMapPayload(button, payload);
     }
 
-    async function submitVehicleMapPayload(button, payload) {
+    async function submitVehicleMapPayload(button, payload, options = {}) {
       const originalText = button.innerText;
+      const { keepModalOpenOnError = false, modalSaveButton = null } = options;
 
       try {
         button.disabled = true;
         button.innerText = "Saving...";
+
+        if (modalSaveButton) {
+          modalSaveButton.disabled = true;
+          modalSaveButton.innerText = "Saving...";
+        }
 
         const response = await fetch(vehicleMapEditWebhookUrl, {
           method: "POST",
@@ -68,22 +74,45 @@ JS_BLOCK = """    function getServiceBaseUrl() {
         });
 
         if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+          const errorBody = await response.json().catch(() => null);
+          const message = errorBody && errorBody.error ? errorBody.error : `HTTP ${response.status}`;
+          throw new Error(message);
         }
 
         button.innerText = "Saved";
+
+        if (keepModalOpenOnError) {
+          closeVehicleEditModal();
+        }
 
         setTimeout(() => {
           window.location.reload();
         }, 2500);
       } catch (error) {
         console.error(error);
-        button.innerText = "Failed";
 
-        setTimeout(() => {
+        if (keepModalOpenOnError) {
           button.innerText = originalText;
           button.disabled = false;
-        }, 4000);
+
+          if (modalSaveButton) {
+            modalSaveButton.disabled = false;
+            modalSaveButton.innerText = "Save";
+          }
+
+          const errorEl = document.getElementById("vehicleEditError");
+          if (errorEl) {
+            errorEl.textContent = error.message;
+            errorEl.hidden = false;
+          }
+        } else {
+          button.innerText = "Failed";
+
+          setTimeout(() => {
+            button.innerText = originalText;
+            button.disabled = false;
+          }, 4000);
+        }
       }
     }
 
@@ -97,10 +126,11 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       const notesInput = document.getElementById("vehicleEditNotesInput");
       const errorEl = document.getElementById("vehicleEditError");
 
-      const category = payload.category || "";
-      if (category === "watch") {
+      if (payload.edit_mode === "saved_vehicle" || payload.action === "edit") {
+        titleEl.textContent = "Edit vehicle";
+      } else if (payload.category === "watch") {
         titleEl.textContent = "Add to watchlist";
-      } else if (category === "ignore") {
+      } else if (payload.category === "ignore") {
         titleEl.textContent = "Ignore vehicle";
       } else {
         titleEl.textContent = "Save vehicle";
@@ -121,11 +151,20 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       document.body.style.overflow = "hidden";
       document.addEventListener("keydown", onVehicleEditModalKeydown);
 
-      nameInput.focus();
+      requestAnimationFrame(() => nameInput.focus());
     }
 
     function closeVehicleEditModal() {
       const modal = document.getElementById("vehicleEditModal");
+
+      if (modal.contains(document.activeElement)) {
+        if (_vehicleEditPendingButton) {
+          _vehicleEditPendingButton.focus();
+        } else {
+          document.activeElement.blur();
+        }
+      }
+
       modal.classList.remove("open");
       modal.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
@@ -166,6 +205,7 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       const nameInput = document.getElementById("vehicleEditNameInput");
       const notesInput = document.getElementById("vehicleEditNotesInput");
       const errorEl = document.getElementById("vehicleEditError");
+      const saveButton = document.getElementById("vehicleEditSaveButton");
 
       const name = nameInput.value.trim();
       const notes = notesInput.value.trim();
@@ -184,8 +224,12 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       payload.name = name;
       payload.notes = notes;
 
-      closeVehicleEditModal();
-      submitVehicleMapPayload(button, payload);
+      errorEl.hidden = true;
+      errorEl.textContent = "";
+
+      delete payload.edit_mode;
+
+      submitVehicleMapPayload(button, payload, { keepModalOpenOnError: true, modalSaveButton: saveButton });
     }
 
     function setupVehicleEditModal() {

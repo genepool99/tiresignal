@@ -433,6 +433,15 @@ def known_vehicle_section(rows):
             "sensor_ids": sensor_ids,
         }
 
+        edit_payload = {
+            "action": "add",
+            "edit_mode": "saved_vehicle",
+            "name": row["name"],
+            "category": row["category"],
+            "notes": row["notes"],
+            "sensor_ids": sensor_ids,
+        }
+
         move_button = ""
 
         if category == "known":
@@ -470,6 +479,14 @@ def known_vehicle_section(rows):
             <td>{safe_text(", ".join(sensor_ids))}</td>
             <td>
               <div class="action-buttons">
+                <button
+                  type="button"
+                  class="small-action-button"
+                  data-payload="{safe_text(json.dumps(edit_payload))}"
+                  onclick="editVehicleMapFromButton(this)"
+                >
+                  Edit
+                </button>
                 {move_button}
                 <button
                   type="button"

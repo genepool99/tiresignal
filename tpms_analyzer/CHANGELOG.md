@@ -2,6 +2,21 @@
 
 ## 0.3.5
 
+### Added
+
+- Candidate details drawer: clicking Details on any Best Guess candidate opens a side panel with pass count, sensor count, latest event date, observed models and protocols, pressure range, average RSSI/SNR, and pattern hint pills with caveats.
+- Pattern hint pills on candidate rows and in the drawer show educated-guess vehicle type labels (e.g. likely TPMS, possible sedan) with distinct confidence styling.
+- Add/rename modal replaces `window.prompt()` for adding candidates to the watchlist or ignoring them. The modal accepts a name (required, max 120 characters) and notes/description (optional, max 500 characters) with live character counters and inline validation.
+- Edit modal for saved Known and Watch vehicles lets users update the vehicle name and notes without changing the category or sensor IDs.
+- Loading overlay displayed while the report renders; dismissed automatically once the page is fully loaded.
+- Back-to-top button appears after scrolling past one viewport height and smoothly scrolls back to the top.
+
+### Changed
+
+- Report HTML, CSS, and JavaScript are now generated from separate `report.py`, `report_css.py`, `report_js.py`, and `report_templates.py` source modules, reducing report file size and improving load time.
+- Candidate sections reorganized into a Candidates tab with clearer Best Guess explanations and a dedicated Exact Repeats sub-section.
+- Action URL for the vehicle-map-edit webhook is now resolved via `getServiceBaseUrl()`, which returns `http://<host>:8099` when the report is served under `/local/`, fixing button actions when accessed directly on port 8099.
+
 ## 0.3.4
 
 ### Added
