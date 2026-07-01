@@ -314,7 +314,7 @@ def write_report(context):
     html = html_start(generated_at)
 
     html += f"""
-    <div class="tabs" role="tablist" aria-label="TPMS report sections">
+    <div class="tabs" role="tablist" aria-label="TireSignal report sections">
       <button
         type="button"
         class="tab-button active"
@@ -427,7 +427,7 @@ def html_start(generated_at):
 <html>
 <head>
   <meta charset="utf-8">
-  <title>TPMS Report</title>
+  <title>TireSignal</title>
   <style>{CSS_BLOCK}  </style>
 </head>
 <body>
@@ -435,7 +435,7 @@ def html_start(generated_at):
     <div class="report-loading-card">
       <div class="report-loading-spinner" aria-hidden="true"></div>
       <div>
-        <div class="report-loading-title">Loading TPMS report…</div>
+        <div class="report-loading-title">Loading TireSignal report…</div>
         <div class="report-loading-subtitle">Preparing tables, candidates, and charts.</div>
       </div>
     </div>
@@ -443,7 +443,7 @@ def html_start(generated_at):
   <header>
     <div class="header-row">
       <div>
-        <h1>TPMS Report</h1>
+        <h1>TireSignal</h1>
         <div class="muted">
           Generated: {safe_text(generated_at)} · Version: v{safe_text(APP_VERSION)} · Source: <code>{safe_text(LOG_PATH)}</code>
         </div>
