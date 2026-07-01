@@ -20,6 +20,7 @@ from utils import category_label, display_dt, display_time, parse_time, safe_tex
 from report_css import CSS_BLOCK
 from report_js import JS_BLOCK
 from report_templates import CANDIDATE_DRAWER_HTML
+from report_assets import FAVICON_32_B64, FAVICON_180_B64, LOGO_B64
 
 
 def pill(text, category="info", description=None):
@@ -428,7 +429,13 @@ def html_start(generated_at):
 <head>
   <meta charset="utf-8">
   <title>TireSignal</title>
-  <style>{CSS_BLOCK}  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="data:image/png;base64,{FAVICON_32_B64}">
+  <link rel="apple-touch-icon" sizes="180x180" href="data:image/png;base64,{FAVICON_180_B64}">
+  <style>{CSS_BLOCK}
+.brand-title {{ margin: 0; line-height: 1; }}
+.brand-logo {{ height: 52px; width: auto; display: block; }}
+@media (max-width: 480px) {{ .brand-logo {{ height: 36px; }} }}
+  </style>
 </head>
 <body>
   <div id="reportLoadingOverlay" class="report-loading-overlay" role="status" aria-live="polite">
@@ -443,7 +450,7 @@ def html_start(generated_at):
   <header>
     <div class="header-row">
       <div>
-        <h1>TireSignal</h1>
+        <h1 class="brand-title"><img class="brand-logo" src="data:image/png;base64,{LOGO_B64}" alt="TireSignal"></h1>
         <div class="muted">
           Generated: {safe_text(generated_at)} · Version: v{safe_text(APP_VERSION)} · Source: <code>{safe_text(LOG_PATH)}</code>
         </div>
