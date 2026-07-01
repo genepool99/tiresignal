@@ -435,6 +435,7 @@ def html_start(generated_at):
 .brand-title {{ margin: 0; line-height: 1; }}
 .brand-logo {{ height: 52px; width: auto; display: block; }}
 @media (max-width: 480px) {{ .brand-logo {{ height: 36px; }} }}
+.header-meta {{ font-size: 12px; letter-spacing: 0.01em; margin-top: 6px; opacity: 0.75; }}
   </style>
 </head>
 <body>
@@ -451,7 +452,7 @@ def html_start(generated_at):
     <div class="header-row">
       <div>
         <h1 class="brand-title"><img class="brand-logo" src="data:image/png;base64,{LOGO_B64}" alt="TireSignal"></h1>
-        <div class="muted">
+        <div class="muted header-meta">
           Generated: {safe_text(generated_at)} · Version: v{safe_text(APP_VERSION)} · Source: <code>{safe_text(LOG_PATH)}</code>
         </div>
       </div>
