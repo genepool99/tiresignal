@@ -15,7 +15,7 @@ from tpms_config import (
     VEHICLE_MAP_PATH,
     VERY_STRONG_PASS_COUNT,
 )
-from utils import category_label, display_dt, display_time, parse_time, safe_text
+from utils import category_label, compute_signal_tags, display_dt, display_time, parse_time, safe_text
 
 from report_css import CSS_BLOCK
 from report_js import JS_BLOCK
@@ -283,6 +283,8 @@ def write_report(context):
         if protocol:
             sensor_protocol_map[sensor_id].add(protocol)
 
+    sensor_by_id = {s["sensor_id"]: s for s in sensor_summaries}
+
     generated_at = datetime.now().astimezone().strftime("%b %-d, %Y, %-I:%M %p")
 
     timeline_points = [
@@ -381,9 +383,9 @@ def write_report(context):
 
     <div id="tab-candidates" class="tab-panel">
 """
-    html += new_unknown_section(new_unknown_candidates, sensor_model_map, sensor_protocol_map)
-    html += overlap_candidates_section(overlap_candidate_summaries, sensor_model_map, sensor_protocol_map)
-    html += exact_candidates_section(exact_candidate_summaries, sensor_model_map, sensor_protocol_map)
+    html += new_unknown_section(new_unknown_candidates, sensor_model_map, sensor_protocol_map, sensor_by_id)
+    html += overlap_candidates_section(overlap_candidate_summaries, sensor_model_map, sensor_protocol_map, sensor_by_id)
+    html += exact_candidates_section(exact_candidate_summaries, sensor_model_map, sensor_protocol_map, sensor_by_id)
 
     html += """
     </div>
@@ -726,7 +728,7 @@ def ignored_vehicle_section(rows):
     return html
 
 
-def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None):
+def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, sensor_by_id=None):
     html = """
     <details class="section">
       <summary class="section-summary">
@@ -790,12 +792,14 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None):
             {"label": "Ignore", "payload": ignore_payload, "handler": "rowMenuEdit"},
         ]
 
-        mixed_label_data = None
+        all_labels = []
         if sensor_model_map is not None or sensor_protocol_map is not None:
             raw_mixed = compute_mixed_sensor_label(sensor_ids, sensor_model_map or {}, sensor_protocol_map or {})
             if raw_mixed:
-                mixed_label_data = {**raw_mixed, "class": pattern_label_class(raw_mixed["text"])}
-        signals_html = pattern_pills([mixed_label_data]) if mixed_label_data else '<span class="muted">—</span>'
+                all_labels.append({**raw_mixed, "class": pattern_label_class(raw_mixed["text"])})
+        if sensor_by_id is not None:
+            all_labels.extend(compute_signal_tags(row, sensor_by_id))
+        signals_html = pattern_pills(all_labels) if all_labels else '<span class="muted">—</span>'
 
         html += f"""
           <tr>
@@ -819,7 +823,7 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None):
     return html
 
 
-def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=None):
+def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=None, sensor_by_id=None):
     html = f"""
     <details class="section">
       <summary class="section-summary">
@@ -898,6 +902,8 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
             if mixed_label:
                 mixed_label["class"] = pattern_label_class(mixed_label["text"])
                 pattern_labels.append(mixed_label)
+        if sensor_by_id is not None:
+            pattern_labels.extend(compute_signal_tags(row, sensor_by_id))
         pattern_pills_html = pattern_pills(pattern_labels)
 
         details_payload = {
@@ -990,7 +996,7 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
     return html
 
 
-def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=None):
+def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=None, sensor_by_id=None):
     html = f"""
     <details class="section">
       <summary class="section-summary">
@@ -1077,12 +1083,14 @@ def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=No
                 {"label": "Ignore", "payload": ignore_payload, "handler": "rowMenuEdit"},
             ]
 
-        mixed_label_data = None
+        all_labels = []
         if sensor_model_map is not None or sensor_protocol_map is not None:
             raw_mixed = compute_mixed_sensor_label(sensor_ids, sensor_model_map or {}, sensor_protocol_map or {})
             if raw_mixed:
-                mixed_label_data = {**raw_mixed, "class": pattern_label_class(raw_mixed["text"])}
-        exact_signals_html = pattern_pills([mixed_label_data]) if mixed_label_data else '<span class="muted">—</span>'
+                all_labels.append({**raw_mixed, "class": pattern_label_class(raw_mixed["text"])})
+        if sensor_by_id is not None:
+            all_labels.extend(compute_signal_tags(row, sensor_by_id))
+        exact_signals_html = pattern_pills(all_labels) if all_labels else '<span class="muted">—</span>'
 
         html += f"""
           <tr>
