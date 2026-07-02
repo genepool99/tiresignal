@@ -519,6 +519,11 @@ CSS_BLOCK = """
       color: #0369a1;
     }
 
+    .pill.crowded-window {
+      background: #fde68a;
+      color: #78350f;
+    }
+
     .note {
       background: #fff7ed;
       border: 1px solid #fed7aa;
