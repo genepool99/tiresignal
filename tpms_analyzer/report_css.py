@@ -184,6 +184,31 @@ CSS_BLOCK = """
       margin: 12px 0;
     }
 
+    .inline-info-button {
+      background: none;
+      border: none;
+      border-bottom: 1px dotted var(--accent);
+      padding: 0;
+      color: var(--accent);
+      font-size: inherit;
+      font-family: inherit;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .inline-info-button:hover {
+      color: var(--accent-strong);
+      border-bottom-color: var(--accent-strong);
+      border-bottom-style: solid;
+    }
+
+    .inline-info-button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+
     .filter-btn {
       display: inline-flex;
       align-items: center;
@@ -954,6 +979,38 @@ CSS_BLOCK = """
       justify-content: flex-end;
       gap: 8px;
       margin-top: 4px;
+    }
+
+    .info-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 30;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.45);
+    }
+
+    .info-modal[aria-hidden="true"] {
+      display: none;
+    }
+
+    .info-modal-panel {
+      position: relative;
+      width: 480px;
+      max-width: 94vw;
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+      box-sizing: border-box;
+    }
+
+    .info-modal-body {
+      overflow-y: auto;
     }
 
     .actions-cell {

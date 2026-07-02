@@ -452,6 +452,42 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       if (event.key === "Escape") closeCandidateDrawer();
     }
 
+    let infoModalOpener = null;
+
+    function openInfoModal(button) {
+      infoModalOpener = button;
+      const modal = document.getElementById("infoModal");
+      document.getElementById("infoModalTitle").textContent = button.dataset.infoTitle || "";
+      document.getElementById("infoModalBody").innerHTML = button.dataset.infoBody || "";
+      modal.setAttribute("aria-hidden", "false");
+      document.body.style.overflow = "hidden";
+      document.addEventListener("keydown", onInfoModalKeydown);
+      requestAnimationFrame(() => {
+        const closeBtn = modal.querySelector("button[aria-label='Close info modal']");
+        if (closeBtn) closeBtn.focus();
+      });
+    }
+
+    function closeInfoModal() {
+      const modal = document.getElementById("infoModal");
+      if (modal.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
+      modal.setAttribute("aria-hidden", "true");
+      document.getElementById("infoModalTitle").textContent = "";
+      document.getElementById("infoModalBody").innerHTML = "";
+      document.body.style.overflow = "";
+      document.removeEventListener("keydown", onInfoModalKeydown);
+      if (infoModalOpener && typeof infoModalOpener.focus === "function") {
+        infoModalOpener.focus();
+      }
+      infoModalOpener = null;
+    }
+
+    function onInfoModalKeydown(event) {
+      if (event.key === "Escape") closeInfoModal();
+    }
+
     function renderCandidateDrawer(c) {
       const sensorIds = Array.isArray(c.sensor_ids) ? c.sensor_ids : [];
       let html = "";

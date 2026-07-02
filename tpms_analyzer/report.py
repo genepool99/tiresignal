@@ -847,34 +847,11 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
         </span>
         <span class="section-summary-action" aria-hidden="true"></span>
       </summary>
-      <p class="muted">Suggested vehicle groups found from TPMS sensors that are repeatedly heard together. Example: if the same 3–4 tire sensors show up together several times, they are probably one vehicle. Use Details to inspect the evidence before naming or ignoring the group.</p>
-      <div class="note">
-        <span class="muted">
-          <strong>How confidence is estimated</strong><br>
-          Confidence is based on how many sensors are in the group and how many times that group was seen. More sensors and more repeat sightings usually means a better guess.
-        </span>
-        <div class="matching-summary">
-          <div class="matching-summary-title">Confidence tiers</div>
-          <div class="matching-summary-grid">
-            <div class="matching-summary-item">
-              <span class="matching-summary-value">2+ sensors</span>
-              <span class="matching-summary-label">Repeated across 2+ passes — Possible</span>
-            </div>
-            <div class="matching-summary-item">
-              <span class="matching-summary-value">3+ sensors</span>
-              <span class="matching-summary-label">Repeated across 2+ passes — Strong</span>
-            </div>
-            <div class="matching-summary-item">
-              <span class="matching-summary-value">{STRONG_SENSOR_COUNT}+ sensors</span>
-              <span class="matching-summary-label">{VERY_STRONG_PASS_COUNT}+ repeated passes — Very strong</span>
-            </div>
-            <div class="matching-summary-item">
-              <span class="matching-summary-value">{MAX_CANDIDATE_SENSOR_COUNT} sensors</span>
-              <span class="matching-summary-label">Larger clusters are ignored</span>
-            </div>
-          </div>
-        </div>
-      </div>
+      <p class="muted">Suggested vehicle groups found from TPMS sensors that are repeatedly heard together. Use Details to inspect the evidence before naming or ignoring the group. <button type="button" class="inline-info-button"
+          onclick="openInfoModal(this)"
+          data-info-title="How confidence is estimated"
+          data-info-body="&lt;p class=&quot;muted&quot;&gt;Confidence is based on how many sensors are in the group and how many times that group was seen. More sensors and more repeat sightings usually means a better guess.&lt;/p&gt;&lt;div class=&quot;matching-summary&quot;&gt;&lt;div class=&quot;matching-summary-title&quot;&gt;Confidence tiers&lt;/div&gt;&lt;div class=&quot;matching-summary-grid&quot;&gt;&lt;div class=&quot;matching-summary-item&quot;&gt;&lt;span class=&quot;matching-summary-value&quot;&gt;2+ sensors&lt;/span&gt;&lt;span class=&quot;matching-summary-label&quot;&gt;Repeated across 2+ passes — Possible&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;matching-summary-item&quot;&gt;&lt;span class=&quot;matching-summary-value&quot;&gt;3+ sensors&lt;/span&gt;&lt;span class=&quot;matching-summary-label&quot;&gt;Repeated across 2+ passes — Strong&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;matching-summary-item&quot;&gt;&lt;span class=&quot;matching-summary-value&quot;&gt;{STRONG_SENSOR_COUNT}+ sensors&lt;/span&gt;&lt;span class=&quot;matching-summary-label&quot;&gt;{VERY_STRONG_PASS_COUNT}+ repeated passes — Very strong&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;matching-summary-item&quot;&gt;&lt;span class=&quot;matching-summary-value&quot;&gt;{MAX_CANDIDATE_SENSOR_COUNT} sensors&lt;/span&gt;&lt;span class=&quot;matching-summary-label&quot;&gt;Larger clusters are ignored&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;"
+        >How this works</button></p>
       <div class="toolbar">
         <input id="overlapCandidateSearchInput" placeholder="Search names, IDs, confidence..." oninput="filterTable('overlapCandidateTable', this.value)">
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Very strong', 'confidence')">Very strong</button>

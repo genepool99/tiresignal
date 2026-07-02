@@ -40,6 +40,21 @@ CANDIDATE_DRAWER_HTML = """
       </div>
     </div>
   </div>
+  <div id="infoModal" class="info-modal" aria-hidden="true" onclick="closeInfoModal()">
+    <div class="info-modal-panel"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="infoModalTitle"
+         onclick="event.stopPropagation()">
+      <div class="vehicle-edit-modal-header">
+        <h2 id="infoModalTitle"></h2>
+        <button type="button" class="candidate-drawer-close"
+                onclick="closeInfoModal()"
+                aria-label="Close info modal">&#x2715; Close</button>
+      </div>
+      <div id="infoModalBody" class="info-modal-body"></div>
+    </div>
+  </div>
   <button id="backToTopButton" class="back-to-top-button" type="button" aria-label="Back to top">
     &#x2191; Top
   </button>
