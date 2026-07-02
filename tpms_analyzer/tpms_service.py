@@ -20,6 +20,7 @@ _run_lock = threading.Lock()
 
 STATIC_PNGS = frozenset({
     "tiresignal-logo.png",
+    "tiresignal-report-logo.png",
     "tiresignal-favicon-32.png",
     "tiresignal-favicon-180.png",
 })

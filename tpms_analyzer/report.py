@@ -466,7 +466,7 @@ def html_start(generated_at):
       <div>
         <h1 class="brand-title">
           <button type="button" class="brand-logo-button" onclick="showReportTab('tab-overview')" aria-label="Go to Overview tab">
-            <img class="brand-logo" src="tiresignal-logo.png" alt="TireSignal">
+            <img class="brand-logo" src="tiresignal-report-logo.png" alt="TireSignal">
           </button>
         </h1>
         <div class="header-meta">

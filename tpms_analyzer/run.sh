@@ -46,6 +46,7 @@ bashio::log.info "Min repeat cluster count: ${TPMS_MIN_REPEAT_CLUSTER_COUNT}"
 REPORT_DIR="$(dirname "${TPMS_REPORT_PATH}")"
 mkdir -p "${REPORT_DIR}"
 cp /app/tiresignal-logo.png        "${REPORT_DIR}/tiresignal-logo.png"
+cp /app/tiresignal-report-logo.png "${REPORT_DIR}/tiresignal-report-logo.png"
 cp /app/tiresignal-favicon-32.png  "${REPORT_DIR}/tiresignal-favicon-32.png"
 cp /app/tiresignal-favicon-180.png "${REPORT_DIR}/tiresignal-favicon-180.png"
 
