@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import json
+import os
 from datetime import datetime
 import shutil
 from analysis import (
@@ -21,7 +22,23 @@ from tpms_config import DB_PATH, OUT_DIR, REPORT_PATH, STATUS_PATH, VEHICLE_MAP_
 from vehicle_map import load_vehicle_map
 
 
+_ADDON_ENV_VARS = ("TPMS_DB_PATH", "TPMS_REPORT_PATH", "TPMS_STATUS_PATH", "TPMS_VEHICLE_MAP_PATH")
+
+
+def _warn_if_dev_environment():
+    missing = [v for v in _ADDON_ENV_VARS if not os.environ.get(v)]
+    if not missing:
+        return
+    print("WARNING: analyze_tpms.py is running without the full TireSignal add-on environment.", flush=True)
+    print("WARNING: Missing TPMS_* path env vars may cause a dev/local SQLite DB to overwrite the published Home Assistant report/status files.", flush=True)
+    print(f"WARNING: DB path:     {DB_PATH}", flush=True)
+    print(f"WARNING: Report path: {REPORT_PATH}", flush=True)
+    print(f"WARNING: Status path: {STATUS_PATH}", flush=True)
+    print("WARNING: Use the add-on refresh service, or set TPMS_DB_PATH/TPMS_REPORT_PATH/TPMS_STATUS_PATH explicitly for dev runs.", flush=True)
+
+
 def main():
+    _warn_if_dev_environment()
     ensure_dirs()
 
     vehicles, sensor_to_vehicle, normalized_vehicles = load_vehicle_map()
