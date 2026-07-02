@@ -481,6 +481,11 @@ def summary_cards(
     ignore_count,
     ingest_stats,
 ):
+    signal_counts = {"Strong": 0, "Normal": 0, "Weak": 0, "Unknown": 0}
+    for sensor in sensor_summaries:
+        sq = sensor.get("signal_quality", "Unknown")
+        signal_counts[sq] = signal_counts.get(sq, 0) + 1
+
     return f"""
     <div class="cards">
       <div class="card">
@@ -514,6 +519,22 @@ def summary_cards(
       <div class="card">
         <div class="big">{ingest_stats.get("imported", 0)}</div>
         <div>New Events Imported</div>
+      </div>
+      <div class="card">
+        <div class="big">{signal_counts["Strong"]}</div>
+        <div>Strong Signal Sensors</div>
+      </div>
+      <div class="card">
+        <div class="big">{signal_counts["Normal"]}</div>
+        <div>Normal Signal Sensors</div>
+      </div>
+      <div class="card">
+        <div class="big">{signal_counts["Weak"]}</div>
+        <div>Weak Signal Sensors</div>
+      </div>
+      <div class="card">
+        <div class="big">{signal_counts["Unknown"]}</div>
+        <div>Unknown Signal Sensors</div>
       </div>
     </div>
 """
