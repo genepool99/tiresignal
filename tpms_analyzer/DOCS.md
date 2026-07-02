@@ -1,6 +1,4 @@
-<p align="center">
-  <img src="tiresignal-logo.png" alt="TireSignal logo" width="420">
-</p>
+![TireSignal logo](tiresignal-logo.png)
 
 # TireSignal
 

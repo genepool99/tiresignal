@@ -1245,7 +1245,11 @@ def recent_passes_section(rows):
         crowded_indicator = ""
 
         if row["sensor_count"] > MAX_CANDIDATE_SENSOR_COUNT:
-            crowded_indicator = pill("Crowded window", "unknown")
+            crowded_indicator = pill(
+                "Crowded window",
+                "unknown",
+                f"More than {MAX_CANDIDATE_SENSOR_COUNT} sensors were heard in this pass, so it's too crowded to use for candidate clustering.",
+            )
 
         html += f"""
           <tr>
