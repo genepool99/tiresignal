@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.11
+
+### Added
+
+- Added per-sensor Signal Quality labels based on rtl_433 RSSI/SNR averages.
+- Added Signal Quality counts to the Overview summary cards.
+- Added exploratory signal behavior tags for unknown candidate groups, including Loud Stranger, Quiet Regular, Radio Ghost, Close Pass Candidate, Background Regular, High-Confidence Unknown, Blink-and-Gone, and Signal Lurker.
+- Added hover descriptions and accessible labels for signal behavior tags.
+
+### Fixed
+
+- Fixed the Signal Quality chart noise trace by passing stored noise values into the report timeline data.
+- Fixed candidate drawer focus handling so closing the drawer no longer leaves focus inside an aria-hidden element.
+
 ## 0.3.10
 
 ### Fixed
