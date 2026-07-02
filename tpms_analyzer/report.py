@@ -443,6 +443,8 @@ def html_start(generated_at):
 .brand-title {{ margin: 0; line-height: 1; }}
 .brand-logo {{ height: 90px; width: auto; display: block; }}
 @media (max-width: 480px) {{ .brand-logo {{ height: 36px; }} }}
+.brand-logo-button {{ display: block; background: none; border: none; padding: 0; margin: 0; cursor: pointer; border-radius: 10px; }}
+.brand-logo-button:focus-visible {{ outline: 3px solid rgba(37, 99, 235, 0.35); outline-offset: 3px; }}
 .header-meta {{ display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }}
 .header-chip {{ display: inline-flex; align-items: baseline; gap: 5px; font-size: 12px; line-height: 1.4; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: #ffffff; color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow-sm); white-space: nowrap; }}
 .header-chip-label {{ color: var(--muted); font-weight: 700; }}
@@ -462,7 +464,11 @@ def html_start(generated_at):
   <header>
     <div class="header-row">
       <div>
-        <h1 class="brand-title"><img class="brand-logo" src="tiresignal-logo.png" alt="TireSignal"></h1>
+        <h1 class="brand-title">
+          <button type="button" class="brand-logo-button" onclick="showReportTab('tab-overview')" aria-label="Go to Overview tab">
+            <img class="brand-logo" src="tiresignal-logo.png" alt="TireSignal">
+          </button>
+        </h1>
         <div class="header-meta">
           <span class="header-chip"><span class="header-chip-label">Generated</span>{safe_text(generated_at)}</span>
           <span class="header-chip"><span class="header-chip-label">Version</span>v{safe_text(APP_VERSION)}</span>
