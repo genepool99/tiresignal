@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.3.12
+
+### Added
+
+- Added rule-based unknown-candidate tags for recurring behavior patterns:
+  - "Poss. Stalker" for persistent unknown signals seen across multiple days and still recently active.
+  - "Weekend Warrior" for unknown signals seen mostly on weekends.
+  - "Commuter" for unknown signals seen mostly on weekdays.
+- Added quick filters to the Candidates page for confidence levels and signal/pattern tags.
+- Added a reusable read-only info modal for report explanations.
+- Added "How this works" help links to all three candidate sections.
+
+### Changed
+
+- Moved the Best Guess confidence explanation out of the page body and into a modal triggered by an inline help link.
+- Cleaned up candidate section intro text by moving examples and details into help modals.
+- Improved inline help-link styling so it feels less like a default blue link and more like a subtle report affordance.
+
+### Compatibility
+
+- Kept existing report generation, candidate matching thresholds, row actions, drawer behavior, vehicle map actions, database schema, runtime paths, and output filenames unchanged.
+- Candidate tags are additive and do not change existing matching or classification behavior.
+
 ## 0.3.11
 
 ### Added
