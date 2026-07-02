@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.3.14
+
+### Added
+
+- Added support for a report-specific TireSignal header logo asset.
+- Added runtime copying for `tiresignal-report-logo.png` so it is placed beside the generated report HTML.
+- Added `tiresignal-report-logo.png` to the report service static PNG allowlist.
+
+### Changed
+
+- Updated the generated report header to use `tiresignal-report-logo.png` instead of the general TireSignal logo.
+
 ## 0.3.13
 
 ### Added
