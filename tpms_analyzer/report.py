@@ -283,7 +283,7 @@ def write_report(context):
         if protocol:
             sensor_protocol_map[sensor_id].add(protocol)
 
-    generated_at = datetime.now().astimezone().strftime("%Y-%m-%d %H:%M:%S %Z")
+    generated_at = datetime.now().astimezone().strftime("%b %-d, %Y, %-I:%M %p")
 
     timeline_points = [
         {
@@ -881,8 +881,8 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
             "match_text": known_match_text(row["known_match"]),
             "sensor_count": row["sensor_count"],
             "pass_count": row["pass_count"],
-            "first_seen": row["first_seen"],
-            "last_seen": row["last_seen"],
+            "first_seen": display_time(row["first_seen"]),
+            "last_seen": display_time(row["last_seen"]),
             "sensor_ids": sensor_ids,
             "pattern_labels": pattern_labels,
         }

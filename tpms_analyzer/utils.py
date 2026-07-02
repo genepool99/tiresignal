@@ -27,20 +27,53 @@ def parse_time(value):
     return None
 
 
+def human_dt(dt, now=None):
+    if not dt:
+        return "—"
+
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+
+    if now is None:
+        now = datetime.now(timezone.utc)
+    elif now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+
+    delta_seconds = (now - dt).total_seconds()
+    local_dt = dt.astimezone()
+    local_now = now.astimezone()
+
+    if delta_seconds < 0:
+        return local_dt.strftime("%b %-d, %Y, %-I:%M %p")
+
+    if delta_seconds < 60:
+        return "just now"
+
+    if delta_seconds < 3600:
+        minutes = int(delta_seconds // 60)
+        return f"{minutes} min ago"
+
+    if local_dt.date() == local_now.date():
+        hours = int(delta_seconds // 3600)
+        return f"{hours} hour{'s' if hours != 1 else ''} ago"
+
+    return local_dt.strftime("%b %-d, %Y, %-I:%M %p")
+
+
 def display_time(value):
     dt = parse_time(value)
 
     if not dt:
-        return safe_text(value or "")
+        return "—"
 
-    return safe_text(dt.strftime("%Y-%m-%d %H:%M:%S"))
+    return safe_text(human_dt(dt))
 
 
 def display_dt(dt):
     if not dt:
-        return ""
+        return "—"
 
-    return safe_text(dt.strftime("%Y-%m-%d %H:%M:%S"))
+    return safe_text(human_dt(dt))
 
 
 def safe_text(value):

@@ -897,7 +897,7 @@ JS_BLOCK = """    function getServiceBaseUrl() {
 
     function samplingNote(sampledCount, totalCount) {
       if (totalCount <= sampledCount) return "";
-      return `Showing ${sampledCount.toLocaleString()} of ${totalCount.toLocaleString()} points for performance.`;
+      return `Showing ${sampledCount.toLocaleString()} of ${totalCount.toLocaleString()} points.`;
     }
 
     function chartTitleWithSampling(title, notes) {
