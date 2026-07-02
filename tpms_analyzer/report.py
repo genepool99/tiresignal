@@ -746,7 +746,15 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, s
       </summary>
       <p class="muted">Sensor clusters that appeared together repeatedly but have not been labeled yet. Example: a recurring four-sensor group may be a new vehicle to add, watch, or ignore.</p>
       <div class="toolbar">
-        <input placeholder="Search unknown candidates..." oninput="filterTable('newUnknownTable', this.value)">
+        <input id="newUnknownSearchInput" placeholder="Search unknown candidates..." oninput="filterTable('newUnknownTable', this.value)">
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Very strong', 'info')">Very strong</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Strong', 'info')">Strong</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Possible', 'info')">Possible</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'High-Confidence Unknown', '')">High-Confidence Unknown</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Poss. Stalker', '')">Poss. Stalker</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Commuter', '')">Commuter</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
       </div>
       <table id="newUnknownTable">
         <thead>
@@ -868,7 +876,15 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
         </div>
       </div>
       <div class="toolbar">
-        <input placeholder="Search names, IDs, confidence..." oninput="filterTable('overlapCandidateTable', this.value)">
+        <input id="overlapCandidateSearchInput" placeholder="Search names, IDs, confidence..." oninput="filterTable('overlapCandidateTable', this.value)">
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Very strong', 'confidence')">Very strong</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Strong', 'confidence')">Strong</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Possible', 'confidence')">Possible</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'High-Confidence Unknown', '')">High-Confidence Unknown</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Poss. Stalker', '')">Poss. Stalker</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Commuter', '')">Commuter</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
       </div>
       <table id="overlapCandidateTable">
         <thead>
@@ -1014,7 +1030,15 @@ def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=No
       </summary>
       <p class="muted">Groups passes where the identical set of sensor IDs appeared together repeatedly. Example: the same three tire IDs seen together at least {MIN_REPEAT_CLUSTER_COUNT} times. This is stricter than Best Guess and may miss partial passes.</p>
       <div class="toolbar">
-        <input placeholder="Search exact candidates..." oninput="filterTable('exactCandidateTable', this.value)">
+        <input id="exactCandidateSearchInput" placeholder="Search exact candidates..." oninput="filterTable('exactCandidateTable', this.value)">
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Very strong', 'info')">Very strong</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Strong', 'info')">Strong</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Possible', 'info')">Possible</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'High-Confidence Unknown', '')">High-Confidence Unknown</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Poss. Stalker', '')">Poss. Stalker</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Commuter', '')">Commuter</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
       </div>
       <table id="exactCandidateTable">
         <thead>

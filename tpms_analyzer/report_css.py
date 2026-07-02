@@ -184,6 +184,28 @@ CSS_BLOCK = """
       margin: 12px 0;
     }
 
+    .filter-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      white-space: nowrap;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .filter-btn:hover,
+    .filter-btn:focus-visible {
+      border-color: var(--muted);
+      background: #f3f4f6;
+      outline: none;
+    }
+
     .chart-toolbar {
       display: flex;
       gap: 12px;

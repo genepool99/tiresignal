@@ -578,6 +578,32 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       });
     }
 
+    function quickFilterTable(tableId, inputId, query) {
+      const input = document.getElementById(inputId);
+      input.value = input.value === query ? "" : query;
+      filterTable(tableId, input.value);
+    }
+
+    function quickFilterExactPillTable(tableId, inputId, query, pillClass) {
+      const input = document.getElementById(inputId);
+      input.value = input.value === query ? "" : query;
+      const active = input.value;
+      const table = document.getElementById(tableId);
+      const rows = table.querySelectorAll("tbody tr");
+
+      if (!active) {
+        rows.forEach(row => { row.style.display = ""; });
+        return;
+      }
+
+      rows.forEach(row => {
+        const selector = pillClass ? `.pill.${pillClass}` : ".pill";
+        const pills = row.querySelectorAll(selector);
+        const match = Array.from(pills).some(pill => pill.textContent.trim() === active);
+        row.style.display = match ? "" : "none";
+      });
+    }
+
     function makeTablesSortable() {
       document.querySelectorAll("table").forEach(table => {
         table.querySelectorAll("th").forEach((th, index) => {
