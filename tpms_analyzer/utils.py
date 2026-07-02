@@ -145,6 +145,109 @@ def signal_quality_label(avg_rssi, avg_snr, rssi_count):
     return "Weak"
 
 
+def compute_signal_tags(candidate, sensor_lookup):
+    if candidate.get("category"):
+        return []
+    if candidate.get("known_vehicle"):
+        return []
+
+    sensor_ids = candidate.get("sensor_ids") or []
+    pass_count = candidate.get("pass_count") or 0
+    confidence = candidate.get("confidence") or ""
+
+    sensor_rows = [
+        sensor_lookup[sid]
+        for sid in sensor_ids
+        if sid in sensor_lookup
+    ]
+
+    qualities = [row.get("signal_quality", "Unknown") for row in sensor_rows]
+
+    def majority_quality():
+        if not qualities:
+            return "Unknown"
+        counts = {}
+        for q in qualities:
+            counts[q] = counts.get(q, 0) + 1
+        return max(counts, key=counts.get)
+
+    majority = majority_quality()
+
+    snr_values = [row["avg_snr"] for row in sensor_rows if row.get("avg_snr") is not None]
+    rssi_values = [row["avg_rssi"] for row in sensor_rows if row.get("avg_rssi") is not None]
+    max_snr = max(snr_values) if snr_values else None
+    max_rssi = max(rssi_values) if rssi_values else None
+
+    first_seen = parse_time(candidate.get("first_seen"))
+    last_seen = parse_time(candidate.get("last_seen"))
+    duration_seconds = None
+    if first_seen is not None and last_seen is not None:
+        duration_seconds = max(0, (last_seen - first_seen).total_seconds())
+
+    tags = []
+
+    def add_tag(text, class_name, description):
+        tags.append({"text": text, "class": class_name, "description": description})
+
+    if confidence in ("Very strong", "Strong"):
+        add_tag(
+            "High-Confidence Unknown",
+            "known",
+            "Unknown group has a strong repeat pattern and may be worth mapping.",
+        )
+
+    if pass_count == 3 and duration_seconds is not None and duration_seconds < 2 * 60 * 60:
+        add_tag(
+            "Blink-and-Gone",
+            "pattern-fluke",
+            "Barely repeated and only seen in a short time window.",
+        )
+
+    if majority == "Strong" and pass_count <= 5:
+        add_tag(
+            "Loud Stranger",
+            "info",
+            "Unknown group has a strong signal but has not repeated many times.",
+        )
+
+    if (max_snr is not None and max_snr >= 15.0) or (max_rssi is not None and max_rssi >= -2.0):
+        add_tag(
+            "Close Pass Candidate",
+            "known",
+            "One or more sensors had an unusually strong decode for this receiver.",
+        )
+
+    if majority == "Weak" and pass_count >= 10:
+        add_tag(
+            "Quiet Regular",
+            "pattern-fluke",
+            "Weak signal, but it repeats often enough to be interesting.",
+        )
+
+    if majority in ("Weak", "Unknown") and pass_count >= 20:
+        add_tag(
+            "Background Regular",
+            "pattern-fluke",
+            "Weak or unknown signal that appears repeatedly over many passes.",
+        )
+
+    if majority == "Unknown":
+        add_tag(
+            "Radio Ghost",
+            "unknown",
+            "No reliable signal quality measurements were available for this group.",
+        )
+
+    if majority in ("Normal", "Weak") and 3 <= pass_count < 10:
+        add_tag(
+            "Signal Lurker",
+            "info",
+            "Mid-strength or weak unknown that has repeated but not enough to call regular.",
+        )
+
+    return tags
+
+
 def category_label(category):
     category = str(category or "").lower()
 

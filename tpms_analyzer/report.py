@@ -245,7 +245,7 @@ def saved_match_html(known_vehicle, category, known_match):
 def pattern_pills(labels):
     html = ""
     for lbl in labels:
-        desc = lbl.get("caveat") or PATTERN_LABEL_DESCRIPTIONS.get(lbl.get("text", ""), "")
+        desc = lbl.get("caveat") or lbl.get("description") or PATTERN_LABEL_DESCRIPTIONS.get(lbl.get("text", ""), "")
         cls = safe_text(lbl.get("class", "pattern-default"))
         text = safe_text(lbl.get("text", ""))
         if desc:

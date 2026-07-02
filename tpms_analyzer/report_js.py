@@ -414,7 +414,10 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       submitVehicleMapPayload(toggle, payload);
     }
 
+    let candidateDrawerOpener = null;
+
     function openCandidateDrawer(button) {
+      candidateDrawerOpener = button;
       closeAllRowActionsMenus();
       const candidate = JSON.parse(button.dataset.candidate || "{}");
       const drawer = document.getElementById("candidateDrawer");
@@ -432,10 +435,17 @@ JS_BLOCK = """    function getServiceBaseUrl() {
 
     function closeCandidateDrawer() {
       const drawer = document.getElementById("candidateDrawer");
+      if (drawer.contains(document.activeElement)) {
+        document.activeElement.blur();
+      }
       drawer.classList.remove("open");
       drawer.setAttribute("aria-hidden", "true");
       document.body.style.overflow = "";
       document.removeEventListener("keydown", onCandidateDrawerKeydown);
+      if (candidateDrawerOpener && typeof candidateDrawerOpener.focus === "function") {
+        candidateDrawerOpener.focus();
+      }
+      candidateDrawerOpener = null;
     }
 
     function onCandidateDrawerKeydown(event) {
