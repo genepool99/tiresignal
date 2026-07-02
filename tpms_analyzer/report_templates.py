@@ -48,9 +48,9 @@ CANDIDATE_DRAWER_HTML = """
          onclick="event.stopPropagation()">
       <div class="vehicle-edit-modal-header">
         <h2 id="infoModalTitle"></h2>
-        <button type="button" class="candidate-drawer-close"
+        <button type="button" class="info-modal-close"
                 onclick="closeInfoModal()"
-                aria-label="Close info modal">&#x2715; Close</button>
+                aria-label="Close info modal">&#x00D7;</button>
       </div>
       <div id="infoModalBody" class="info-modal-body"></div>
     </div>

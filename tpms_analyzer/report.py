@@ -744,10 +744,10 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, s
         </span>
         <span class="section-summary-action" aria-hidden="true"></span>
       </summary>
-      <p class="muted">Sensor clusters that appeared together repeatedly, but have not been labeled yet. Review each group and use Add Watch or Ignore — or skip it for now. <button type="button" class="inline-info-button"
+      <p class="muted">Sensor clusters that appeared together repeatedly, but have not been labeled yet. <button type="button" class="inline-info-button"
           onclick="openInfoModal(this)"
           data-info-title="About Unlabeled Repeat Candidates"
-          data-info-body="&lt;p class=&quot;muted&quot;&gt;A group appears here when sensors are heard together repeatedly and are not yet saved to your vehicle map.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Add Watch&lt;/strong&gt; saves the group for follow-up. You can rename it later once you are sure.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Ignore&lt;/strong&gt; is useful for noise — a neighbor, a delivery vehicle, or any signal you do not want to track.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;Leaving a group unlabeled is fine when you need more data before deciding.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;These groups are filtered from Best Guess Candidates — check that section for confidence scores and more detail.&lt;/p&gt;"
+          data-info-body="&lt;p class=&quot;muted&quot;&gt;A group appears here when sensors are heard together repeatedly and are not yet saved to your vehicle map.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Add Watch&lt;/strong&gt; saves the group for follow-up. You can rename it later once you are sure.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Ignore&lt;/strong&gt; is useful for noise like a neighbor, a delivery vehicle, or any signal you do not want to track.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;Leaving a group unlabeled is fine when you need more data before deciding.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;These groups are filtered from Best Guess Candidates — check that section for confidence scores and more detail.&lt;/p&gt;"
         >How this works</button></p>
       <div class="toolbar">
         <input id="newUnknownSearchInput" placeholder="Search unknown candidates..." oninput="filterTable('newUnknownTable', this.value)">

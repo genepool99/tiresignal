@@ -995,7 +995,7 @@ CSS_BLOCK = """
       display: flex;
       align-items: center;
       justify-content: center;
-      background: rgba(0, 0, 0, 0.45);
+      background: rgba(15, 23, 42, 0.40);
     }
 
     .info-modal[aria-hidden="true"] {
@@ -1004,20 +1004,79 @@ CSS_BLOCK = """
 
     .info-modal-panel {
       position: relative;
-      width: 480px;
+      width: 520px;
       max-width: 94vw;
       max-height: 90vh;
       overflow-y: auto;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 24px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.14);
+      border-top: 4px solid var(--accent);
+      border-radius: 18px;
+      padding: 26px 28px;
+      box-shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
       box-sizing: border-box;
+    }
+
+    .info-modal .vehicle-edit-modal-header {
+      align-items: center;
+      margin-bottom: 16px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .info-modal-panel h2 {
+      margin: 0;
+      font-size: 20px;
+      color: var(--text);
+    }
+
+    .info-modal-close {
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--text);
+      font-size: 20px;
+      line-height: 1;
+      padding: 0;
+      cursor: pointer;
+    }
+
+    .info-modal-close:hover {
+      background: var(--border);
+    }
+
+    .info-modal-close:focus-visible {
+      outline: 3px solid rgba(37, 99, 235, 0.35);
+      outline-offset: 2px;
     }
 
     .info-modal-body {
       overflow-y: auto;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .info-modal-body p {
+      margin: 0 0 12px;
+    }
+
+    .info-modal-body p:last-child {
+      margin-bottom: 0;
+    }
+
+    .info-modal-body strong {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    .info-modal-body .muted {
+      color: #4b5563;
     }
 
     .actions-cell {
