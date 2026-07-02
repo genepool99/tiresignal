@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.3.13
+
+### Added
+
+- Added hover/help text to the "Crowded window" recent-pass pill.
+- Added a dedicated warning color for the "Crowded window" pill.
+- Made the TireSignal header logo clickable so it returns to the Overview tab.
+
+### Changed
+
+- Improved the reusable info modal styling with a more polished card layout, icon-only close button, stronger header treatment, and better body readability.
+- Improved Candidates page help-link layout by moving quick filters onto their own row and refining inline "How this works" presentation.
+- Updated the report header Source pill to show the full source path instead of only the filename.
+
+### Compatibility
+
+- Kept existing report output filenames, database schema, runtime paths, candidate matching logic, tab behavior, row actions, drawer behavior, vehicle actions, and refresh behavior unchanged.
+- UI changes are presentation-only and do not change TPMS ingest, clustering, or vehicle mapping behavior.
+
 ## 0.3.12
 
 ### Added
