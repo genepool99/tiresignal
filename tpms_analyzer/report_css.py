@@ -187,24 +187,23 @@ CSS_BLOCK = """
     .inline-info-button {
       background: none;
       border: none;
-      border-bottom: 1px dotted var(--accent);
+      border-bottom: 1px dotted var(--info-text);
       padding: 0;
-      color: var(--accent);
+      color: var(--info-text);
       font-size: inherit;
       font-family: inherit;
-      font-weight: 600;
       text-decoration: none;
       cursor: pointer;
     }
 
     .inline-info-button:hover {
-      color: var(--accent-strong);
-      border-bottom-color: var(--accent-strong);
+      color: var(--text);
+      border-bottom-color: var(--text);
       border-bottom-style: solid;
     }
 
     .inline-info-button:focus-visible {
-      outline: 2px solid var(--accent);
+      outline: 2px solid var(--info-text);
       outline-offset: 2px;
       border-radius: 2px;
     }
