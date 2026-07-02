@@ -154,6 +154,8 @@ def compute_signal_tags(candidate, sensor_lookup):
     sensor_ids = candidate.get("sensor_ids") or []
     pass_count = candidate.get("pass_count") or 0
     confidence = candidate.get("confidence") or ""
+    weekend_pass_count = candidate.get("weekend_pass_count") or 0
+    weekday_pass_count = candidate.get("weekday_pass_count") or 0
 
     sensor_rows = [
         sensor_lookup[sid]
@@ -243,6 +245,33 @@ def compute_signal_tags(candidate, sensor_lookup):
             "Signal Lurker",
             "info",
             "Mid-strength or weak unknown that has repeated but not enough to call regular.",
+        )
+
+    if (
+        pass_count >= 6
+        and first_seen is not None
+        and last_seen is not None
+        and (last_seen - first_seen).days >= 7
+        and (datetime.now(timezone.utc) - last_seen).days <= 14
+    ):
+        add_tag(
+            "Poss. Stalker",
+            "pattern-stalker",
+            "Repeated unknown signal seen across multiple days and still recently active.",
+        )
+
+    if pass_count >= 4 and weekend_pass_count / pass_count >= 0.70:
+        add_tag(
+            "Weekend Warrior",
+            "pattern-weekend",
+            "Unknown signal appears mostly on weekends.",
+        )
+
+    if pass_count >= 4 and weekday_pass_count / pass_count >= 0.70:
+        add_tag(
+            "Commuter",
+            "pattern-commuter",
+            "Unknown signal appears mostly on weekdays.",
         )
 
     return tags

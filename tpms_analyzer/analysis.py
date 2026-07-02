@@ -136,6 +136,9 @@ def summarize_exact_candidates(vehicle_passes, normalized_vehicles):
 
         known_match = match_known_vehicle(sensor_ids, normalized_vehicles)
 
+        weekend_pass_count = sum(1 for p in passes if p["start"].astimezone().weekday() >= 5)
+        weekday_pass_count = len(passes) - weekend_pass_count
+
         rows.append({
             "candidate_key": key,
             "sensor_ids": sensor_ids,
@@ -147,6 +150,8 @@ def summarize_exact_candidates(vehicle_passes, normalized_vehicles):
             "category": known_match["category"],
             "known_match": known_match,
             "confidence": confidence_label(len(sensor_ids), len(passes)),
+            "weekend_pass_count": weekend_pass_count,
+            "weekday_pass_count": weekday_pass_count,
         })
 
     rows.sort(key=lambda r: (r["pass_count"], r["sensor_count"], r["last_seen"]), reverse=True)
@@ -201,6 +206,9 @@ def summarize_overlap_candidates(vehicle_passes, normalized_vehicles):
 
         known_match = match_known_vehicle(sensor_ids, normalized_vehicles)
 
+        weekend_pass_count = sum(1 for p in passes if p["start"].astimezone().weekday() >= 5)
+        weekday_pass_count = len(passes) - weekend_pass_count
+
         rows.append({
             "sensor_ids": sensor_ids,
             "sensor_count": len(sensor_ids),
@@ -211,6 +219,8 @@ def summarize_overlap_candidates(vehicle_passes, normalized_vehicles):
             "category": known_match["category"],
             "known_match": known_match,
             "confidence": confidence_label(len(sensor_ids), len(passes)),
+            "weekend_pass_count": weekend_pass_count,
+            "weekday_pass_count": weekday_pass_count,
         })
 
     rows.sort(key=lambda r: (r["pass_count"], r["sensor_count"], r["last_seen"]), reverse=True)

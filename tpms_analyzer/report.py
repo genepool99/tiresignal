@@ -177,6 +177,9 @@ def pattern_label_class(label_text):
         "Went quiet": "pattern-quiet",
         "Occasional visitor": "pattern-occasional",
         "Mixed sensor types": "pattern-mixed",
+        "Poss. Stalker": "pattern-stalker",
+        "Weekend Warrior": "pattern-weekend",
+        "Commuter": "pattern-commuter",
     }
     return mapping.get(label_text, "pattern-default")
 
@@ -203,6 +206,9 @@ PATTERN_LABEL_DESCRIPTIONS = {
     "Maybe a fluke": "Only a few repeated passes so far. Could be a coincidence.",
     "Went quiet": "Not seen recently relative to this report.",
     "Occasional visitor": "Seen over an extended period, but not very often.",
+    "Poss. Stalker": "Repeated unknown signal seen across multiple days and still recently active.",
+    "Weekend Warrior": "Unknown signal appears mostly on weekends.",
+    "Commuter": "Unknown signal appears mostly on weekdays.",
 }
 
 CONFIDENCE_DESCRIPTIONS = {

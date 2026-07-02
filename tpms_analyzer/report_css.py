@@ -450,6 +450,21 @@ CSS_BLOCK = """
       color: #c2410c;
     }
 
+    .pattern-stalker {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .pattern-weekend {
+      background: #fae8ff;
+      color: #7e22ce;
+    }
+
+    .pattern-commuter {
+      background: #e0f2fe;
+      color: #0369a1;
+    }
+
     .note {
       background: #fff7ed;
       border: 1px solid #fed7aa;
