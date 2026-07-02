@@ -466,7 +466,7 @@ def html_start(generated_at):
         <div class="header-meta">
           <span class="header-chip"><span class="header-chip-label">Generated</span>{safe_text(generated_at)}</span>
           <span class="header-chip"><span class="header-chip-label">Version</span>v{safe_text(APP_VERSION)}</span>
-          <span class="header-chip" title="{safe_text(LOG_PATH)}"><span class="header-chip-label">Source</span><code>{safe_text(LOG_PATH.name)}</code></span>
+          <span class="header-chip" title="{safe_text(LOG_PATH)}"><span class="header-chip-label">Source</span><code>{safe_text(LOG_PATH)}</code></span>
         </div>
       </div>
       <button id="refreshButton" class="refresh-button" onclick="refreshReport()">
