@@ -184,6 +184,14 @@ CSS_BLOCK = """
       margin: 12px 0;
     }
 
+    .candidate-filter-buttons {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
     .inline-info-button {
       background: none;
       border: none;

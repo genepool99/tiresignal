@@ -751,6 +751,7 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, s
         >How this works</button></p>
       <div class="toolbar">
         <input id="newUnknownSearchInput" placeholder="Search unknown candidates..." oninput="filterTable('newUnknownTable', this.value)">
+        <div class="candidate-filter-buttons">
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Very strong', 'info')">Very strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Strong', 'info')">Strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Possible', 'info')">Possible</button>
@@ -759,6 +760,7 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, s
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Commuter', '')">Commuter</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
+        </div>
       </div>
       <table id="newUnknownTable">
         <thead>
@@ -858,6 +860,7 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
         >How this works</button></p>
       <div class="toolbar">
         <input id="overlapCandidateSearchInput" placeholder="Search names, IDs, confidence..." oninput="filterTable('overlapCandidateTable', this.value)">
+        <div class="candidate-filter-buttons">
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Very strong', 'confidence')">Very strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Strong', 'confidence')">Strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Possible', 'confidence')">Possible</button>
@@ -866,6 +869,7 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Commuter', '')">Commuter</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
+        </div>
       </div>
       <table id="overlapCandidateTable">
         <thead>
@@ -1016,6 +1020,7 @@ def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=No
         >How this works</button></p>
       <div class="toolbar">
         <input id="exactCandidateSearchInput" placeholder="Search exact candidates..." oninput="filterTable('exactCandidateTable', this.value)">
+        <div class="candidate-filter-buttons">
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Very strong', 'info')">Very strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Strong', 'info')">Strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Possible', 'info')">Possible</button>
@@ -1024,6 +1029,7 @@ def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=No
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Commuter', '')">Commuter</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
+        </div>
       </div>
       <table id="exactCandidateTable">
         <thead>
