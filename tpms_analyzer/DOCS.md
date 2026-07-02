@@ -1,5 +1,3 @@
-![TireSignal logo](tiresignal-logo.png)
-
 # TireSignal
 
 ## Overview
