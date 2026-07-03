@@ -490,6 +490,13 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       if (event.key === "Escape") closeInfoModal();
     }
 
+    function categoryDisplayLabel(category) {
+      if (category === "known") return "Known";
+      if (category === "watch") return "Watch";
+      if (category === "ignore") return "Ignored";
+      return category;
+    }
+
     function renderCandidateDrawer(c) {
       const sensorIds = Array.isArray(c.sensor_ids) ? c.sensor_ids : [];
       const patternLabels = Array.isArray(c.pattern_labels) ? c.pattern_labels : [];
@@ -538,7 +545,7 @@ JS_BLOCK = """    function getServiceBaseUrl() {
 
       let summaryHtml = `<div class="drawer-pill-row">`;
       if (c.confidence) summaryHtml += `<span class="pill confidence">${escHtml(c.confidence)}</span>`;
-      if (c.category) summaryHtml += `<span class="pill ${escHtml(c.category)}">${escHtml(c.category)}</span>`;
+      if (c.category) summaryHtml += `<span class="pill ${escHtml(c.category)}">${escHtml(categoryDisplayLabel(c.category))}</span>`;
       if (c.known_vehicle) summaryHtml += `<span class="drawer-vehicle-name">${escHtml(c.known_vehicle)}</span>`;
       summaryHtml += `</div>`;
       summaryHtml += `<div class="matching-summary-grid drawer-stat-grid">`;
