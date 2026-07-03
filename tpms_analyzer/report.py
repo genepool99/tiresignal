@@ -1166,6 +1166,21 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, s
             all_labels.extend(compute_signal_tags(row, sensor_by_id))
         signals_html = pattern_pills(all_labels) if all_labels else '<span class="muted">—</span>'
 
+        details_payload = {
+            "title": candidate_name,
+            "confidence": row["confidence"],
+            "category": "",
+            "known_vehicle": "",
+            "match_text": "",
+            "sensor_count": row["sensor_count"],
+            "pass_count": row["pass_count"],
+            "first_seen": display_time(row["first_seen"]),
+            "last_seen": display_time(row["last_seen"]),
+            "sensor_ids": sensor_ids,
+            "pattern_labels": all_labels,
+        }
+        menu_items.append({"label": "Details", "payload": details_payload, "handler": "openCandidateDrawer", "data_attr": "candidate"})
+
         html += f"""
           <tr>
             <td>{pill(row["confidence"], "info", CONFIDENCE_DESCRIPTIONS.get(row["confidence"]))}</td>
