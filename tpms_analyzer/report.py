@@ -969,6 +969,21 @@ def known_vehicle_section(rows):
         menu_items.append({"label": "Ignore", "payload": ignore_payload, "handler": "rowMenuSubmitAction"})
         menu_items.append({"label": "Delete", "payload": remove_payload, "handler": "rowMenuSubmitAction", "danger": True})
 
+        details_payload = {
+            "title": row["name"],
+            "confidence": "",
+            "category": row["category"],
+            "known_vehicle": "",
+            "match_text": "",
+            "sensor_count": len(sensor_ids),
+            "pass_count": row["seen_count"],
+            "first_seen": display_time(row["first_seen"]),
+            "last_seen": display_time(row["last_seen"]),
+            "sensor_ids": sensor_ids,
+            "pattern_labels": [],
+        }
+        menu_items.append({"label": "Details", "payload": details_payload, "handler": "openCandidateDrawer", "data_attr": "candidate"})
+
         html += f"""
           <tr>
             <td>{safe_text(row["name"])}</td>
@@ -1165,6 +1180,21 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, s
         if sensor_by_id is not None:
             all_labels.extend(compute_signal_tags(row, sensor_by_id))
         signals_html = pattern_pills(all_labels) if all_labels else '<span class="muted">—</span>'
+
+        details_payload = {
+            "title": candidate_name,
+            "confidence": row["confidence"],
+            "category": "",
+            "known_vehicle": "",
+            "match_text": "",
+            "sensor_count": row["sensor_count"],
+            "pass_count": row["pass_count"],
+            "first_seen": display_time(row["first_seen"]),
+            "last_seen": display_time(row["last_seen"]),
+            "sensor_ids": sensor_ids,
+            "pattern_labels": all_labels,
+        }
+        menu_items.append({"label": "Details", "payload": details_payload, "handler": "openCandidateDrawer", "data_attr": "candidate"})
 
         html += f"""
           <tr>
@@ -1467,6 +1497,21 @@ def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=No
         if sensor_by_id is not None:
             all_labels.extend(compute_signal_tags(row, sensor_by_id))
         exact_signals_html = pattern_pills(all_labels) if all_labels else '<span class="muted">—</span>'
+
+        details_payload = {
+            "title": known_vehicle or f"Exact Repeat Candidate {index}",
+            "confidence": row["confidence"],
+            "category": category,
+            "known_vehicle": known_vehicle,
+            "match_text": known_match_text(row["known_match"]),
+            "sensor_count": row["sensor_count"],
+            "pass_count": row["pass_count"],
+            "first_seen": display_time(row["first_seen"]),
+            "last_seen": display_time(row["last_seen"]),
+            "sensor_ids": sensor_ids,
+            "pattern_labels": all_labels,
+        }
+        menu_items.append({"label": "Details", "payload": details_payload, "handler": "openCandidateDrawer", "data_attr": "candidate"})
 
         html += f"""
           <tr>
