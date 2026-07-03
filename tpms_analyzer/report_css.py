@@ -726,13 +726,13 @@ CSS_BLOCK = """
 
     .candidate-drawer-panel {
       position: relative;
-      width: 380px;
+      width: 420px;
       max-width: 92vw;
       height: 100vh;
       overflow-y: auto;
       background: var(--card);
       border-left: 1px solid var(--border);
-      padding: 20px;
+      padding: 22px;
       box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
       box-sizing: border-box;
     }
@@ -742,7 +742,7 @@ CSS_BLOCK = """
       align-items: flex-start;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 18px;
     }
 
     .candidate-drawer-close {
@@ -767,6 +767,18 @@ CSS_BLOCK = """
       flex-wrap: wrap;
       align-items: center;
       margin-bottom: 12px;
+    }
+
+    .drawer-summary-section,
+    #candidateDrawerBody > .drawer-pill-row {
+      margin-bottom: 14px;
+    }
+
+    .drawer-summary-section > .drawer-stat-grid,
+    #candidateDrawerBody > .drawer-stat-grid {
+      margin-bottom: 4px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
     }
 
     .report-loading-overlay {
@@ -835,6 +847,13 @@ CSS_BLOCK = """
       margin-bottom: 12px;
     }
 
+    .drawer-block.drawer-why-section,
+    .drawer-block.drawer-evidence-section {
+      margin-top: 16px;
+      margin-bottom: 16px;
+      padding-top: 4px;
+    }
+
     .drawer-pill-list {
       display: flex;
       gap: 6px;
@@ -843,13 +862,117 @@ CSS_BLOCK = """
     }
 
     .drawer-note-hint {
-      margin-top: 4px;
+      margin-top: 8px;
       font-style: italic;
     }
 
     .drawer-section-heading {
       font-weight: 700;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .drawer-hint-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      background: var(--soft);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 8px 10px;
       margin-bottom: 6px;
+    }
+
+    .drawer-hint-row:last-of-type {
+      margin-bottom: 0;
+    }
+
+    .drawer-hint-row .pill {
+      flex-shrink: 0;
+      margin: 0;
+    }
+
+    .drawer-hint-caveat {
+      font-size: 12px;
+      line-height: 1.4;
+      color: var(--muted);
+    }
+
+    .drawer-evidence-section .chart-inline-note {
+      margin-bottom: 6px;
+    }
+
+    .drawer-evidence-section .chart-inline-note:last-child {
+      margin-bottom: 0;
+    }
+
+    .drawer-technical-details {
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--soft);
+      overflow: hidden;
+    }
+
+    .drawer-technical-details > summary {
+      list-style: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+    }
+
+    .drawer-technical-details > summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .drawer-technical-details > summary::marker {
+      content: "";
+    }
+
+    .drawer-technical-details > summary::before {
+      content: "▸";
+      font-size: 10px;
+      transition: transform 0.15s ease;
+    }
+
+    .drawer-technical-details[open] > summary::before {
+      transform: rotate(90deg);
+    }
+
+    .drawer-technical-details > summary:hover {
+      background: var(--border);
+    }
+
+    .drawer-technical-details > summary:focus-visible {
+      outline: 3px solid rgba(37, 99, 235, 0.35);
+      outline-offset: -2px;
+    }
+
+    .drawer-technical-body {
+      padding: 4px 12px 12px;
+      border-top: 1px solid var(--border);
+    }
+
+    .drawer-technical-body .chart-inline-note {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 6px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .drawer-technical-body .chart-inline-note:last-child {
+      margin-bottom: 0;
     }
 
     .matching-summary-value--sm {

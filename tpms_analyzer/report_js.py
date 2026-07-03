@@ -490,117 +490,118 @@ JS_BLOCK = """    function getServiceBaseUrl() {
 
     function renderCandidateDrawer(c) {
       const sensorIds = Array.isArray(c.sensor_ids) ? c.sensor_ids : [];
-      let html = "";
-
-      html += `<div class="drawer-pill-row">`;
-      if (c.confidence) html += `<span class="pill confidence">${escHtml(c.confidence)}</span>`;
-      if (c.category) html += `<span class="pill ${escHtml(c.category)}">${escHtml(c.category)}</span>`;
-      if (c.known_vehicle) html += `<span class="drawer-vehicle-name">${escHtml(c.known_vehicle)}</span>`;
-      html += `</div>`;
-
-      html += `<div class="matching-summary-grid drawer-stat-grid">`;
-      html += `<div class="matching-summary-item"><span class="matching-summary-value">${escHtml(c.sensor_count ?? "")}</span><span class="matching-summary-label">Sensors</span></div>`;
-      html += `<div class="matching-summary-item"><span class="matching-summary-value">${escHtml(c.pass_count ?? "")}</span><span class="matching-summary-label">Passes</span></div>`;
-      html += `</div>`;
-
       const patternLabels = Array.isArray(c.pattern_labels) ? c.pattern_labels : [];
-      if (patternLabels.length > 0) {
-        html += `<div class="drawer-block">`;
-        html += `<div class="drawer-pill-list">`;
-        patternLabels.forEach(label => {
-          const labelClass = label.class || "pattern-default";
-          html += `<span class="pill ${labelClass}">${escHtml(label.text)}</span>`;
-        });
-        html += `</div>`;
-        patternLabels.forEach(label => {
-          html += `<div class="chart-inline-note">${escHtml(label.caveat)}</div>`;
-        });
-        html += `<div class="chart-inline-note drawer-note-hint">Pattern hints are educated guesses from this report, not confirmed identities.</div>`;
-        html += `</div>`;
-      }
-
-      html += `<div class="drawer-block">`;
-      html += `<div class="chart-inline-note drawer-section-heading">Evidence from raw events</div>`;
-
       const candidatePoints = allTimelinePoints.filter(pt => sensorIds.includes(pt.sensor_id));
 
+      let latestDate = null;
+      let latestPoint = null;
+      candidatePoints.forEach(pt => {
+        const d = parseChartTime(pt.time);
+        if (!d) return;
+        if (!latestDate || d > latestDate) {
+          latestDate = d;
+          latestPoint = pt;
+        }
+      });
+
+      const models = Array.from(new Set(
+        candidatePoints.map(pt => categoryValue(pt.model)).filter(v => v !== "Unknown")
+      ));
+      const protocols = Array.from(new Set(
+        candidatePoints.map(pt => categoryValue(pt.protocol)).filter(v => v !== "Unknown")
+      ));
+
+      const pressureRows = candidatePoints
+        .map(pt => pressurePointValue(pt))
+        .filter(pv => pv !== null);
+
+      let pressureLine = "";
+      let hasSuspiciousPressure = false;
+      if (pressureRows.length > 0) {
+        const psiValues = pressureRows.map(pv => pv.normalizedPsi);
+        const minPsi = Math.min(...psiValues);
+        const maxPsi = Math.max(...psiValues);
+        hasSuspiciousPressure = psiValues.some(v => v > PRESSURE_SUSPICIOUS_PSI);
+        pressureLine = `Pressure (PSI): ${formatPressure(minPsi)} – ${formatPressure(maxPsi)}`;
+      }
+
+      const rssiValues = candidatePoints.map(pt => numericValue(pt.rssi)).filter(v => v !== null);
+      const snrValues = candidatePoints.map(pt => numericValue(pt.snr)).filter(v => v !== null);
+      const avgRssi = rssiValues.length > 0
+        ? rssiValues.reduce((a, b) => a + b, 0) / rssiValues.length
+        : null;
+      const avgSnr = snrValues.length > 0
+        ? snrValues.reduce((a, b) => a + b, 0) / snrValues.length
+        : null;
+
+      let summaryHtml = `<div class="drawer-pill-row">`;
+      if (c.confidence) summaryHtml += `<span class="pill confidence">${escHtml(c.confidence)}</span>`;
+      if (c.category) summaryHtml += `<span class="pill ${escHtml(c.category)}">${escHtml(c.category)}</span>`;
+      if (c.known_vehicle) summaryHtml += `<span class="drawer-vehicle-name">${escHtml(c.known_vehicle)}</span>`;
+      summaryHtml += `</div>`;
+      summaryHtml += `<div class="matching-summary-grid drawer-stat-grid">`;
+      summaryHtml += `<div class="matching-summary-item"><span class="matching-summary-value">${escHtml(c.sensor_count ?? "")}</span><span class="matching-summary-label">Sensors</span></div>`;
+      summaryHtml += `<div class="matching-summary-item"><span class="matching-summary-value">${escHtml(c.pass_count ?? "")}</span><span class="matching-summary-label">Passes</span></div>`;
+      summaryHtml += `</div>`;
+
+      let whyHtml = "";
+      if (patternLabels.length > 0) {
+        whyHtml += `<div class="drawer-block drawer-why-section">`;
+        whyHtml += `<div class="chart-inline-note drawer-section-heading">Why this was flagged</div>`;
+        patternLabels.forEach(label => {
+          const labelClass = label.class || "pattern-default";
+          whyHtml += `<div class="drawer-hint-row">`;
+          whyHtml += `<span class="pill ${labelClass}">${escHtml(label.text)}</span>`;
+          whyHtml += `<span class="drawer-hint-caveat">${escHtml(label.caveat || label.description)}</span>`;
+          whyHtml += `</div>`;
+        });
+        whyHtml += `<div class="chart-inline-note drawer-note-hint">Pattern hints are educated guesses from this report, not confirmed identities.</div>`;
+        whyHtml += `</div>`;
+      }
+
+      let evidenceHtml = `<div class="drawer-block drawer-evidence-section">`;
+      evidenceHtml += `<div class="chart-inline-note drawer-section-heading">Evidence</div>`;
       if (candidatePoints.length === 0) {
-        html += `<div class="chart-inline-note">No event detail available from current data.</div>`;
+        evidenceHtml += `<div class="chart-inline-note">No event detail available from current data.</div>`;
       } else {
         const eventCount = candidatePoints.length;
-
-        let latestDate = null;
-        let latestPoint = null;
-        candidatePoints.forEach(pt => {
-          const d = parseChartTime(pt.time);
-          if (!d) return;
-          if (!latestDate || d > latestDate) {
-            latestDate = d;
-            latestPoint = pt;
-          }
-        });
-
-        html += `<div class="matching-summary-grid drawer-stat-grid">`;
-        html += `<div class="matching-summary-item"><span class="matching-summary-value">${escHtml(eventCount)}</span><span class="matching-summary-label">Events</span></div>`;
-        html += `<div class="matching-summary-item"><span class="matching-summary-value matching-summary-value--sm">${latestPoint ? escHtml(localDateLabel(latestPoint.time)) : "Unknown"}</span><span class="matching-summary-label">Latest event</span></div>`;
-        html += `</div>`;
-
-        const models = Array.from(new Set(
-          candidatePoints.map(pt => categoryValue(pt.model)).filter(v => v !== "Unknown")
-        ));
-        const protocols = Array.from(new Set(
-          candidatePoints.map(pt => categoryValue(pt.protocol)).filter(v => v !== "Unknown")
-        ));
-
+        evidenceHtml += `<div class="matching-summary-grid drawer-stat-grid">`;
+        evidenceHtml += `<div class="matching-summary-item"><span class="matching-summary-value">${escHtml(eventCount)}</span><span class="matching-summary-label">Events</span></div>`;
+        evidenceHtml += `<div class="matching-summary-item"><span class="matching-summary-value matching-summary-value--sm">${latestPoint ? escHtml(localDateLabel(latestPoint.time)) : "Unknown"}</span><span class="matching-summary-label">Latest event</span></div>`;
+        evidenceHtml += `</div>`;
         if (models.length > 0) {
-          html += `<div class="chart-inline-note">Models: ${escHtml(models.join(", "))}</div>`;
+          evidenceHtml += `<div class="chart-inline-note">Models: ${escHtml(models.join(", "))}</div>`;
         }
         if (protocols.length > 0) {
-          html += `<div class="chart-inline-note">Protocols: ${escHtml(protocols.join(", "))}</div>`;
-        }
-
-        const pressureRows = candidatePoints
-          .map(pt => pressurePointValue(pt))
-          .filter(pv => pv !== null);
-
-        if (pressureRows.length > 0) {
-          const psiValues = pressureRows.map(pv => pv.normalizedPsi);
-          const minPsi = Math.min(...psiValues);
-          const maxPsi = Math.max(...psiValues);
-          const hasSuspicious = psiValues.some(v => v > PRESSURE_SUSPICIOUS_PSI);
-          const pressureLine = `Pressure (PSI): ${formatPressure(minPsi)} – ${formatPressure(maxPsi)}`;
-          html += `<div class="chart-inline-note">${escHtml(pressureLine)}${hasSuspicious ? ' <span class="pill info">High pressure seen</span>' : ""}</div>`;
-        }
-
-        const rssiValues = candidatePoints.map(pt => numericValue(pt.rssi)).filter(v => v !== null);
-        const snrValues = candidatePoints.map(pt => numericValue(pt.snr)).filter(v => v !== null);
-        const avgRssi = rssiValues.length > 0
-          ? rssiValues.reduce((a, b) => a + b, 0) / rssiValues.length
-          : null;
-        const avgSnr = snrValues.length > 0
-          ? snrValues.reduce((a, b) => a + b, 0) / snrValues.length
-          : null;
-
-        if (avgRssi !== null || avgSnr !== null) {
-          const parts = [];
-          if (avgRssi !== null) parts.push(`Avg RSSI: ${avgRssi.toFixed(1)}`);
-          if (avgSnr !== null) parts.push(`Avg SNR: ${avgSnr.toFixed(1)}`);
-          html += `<div class="chart-inline-note">${escHtml(parts.join(" · "))}</div>`;
+          evidenceHtml += `<div class="chart-inline-note">Protocols: ${escHtml(protocols.join(", "))}</div>`;
         }
       }
+      evidenceHtml += `<div class="chart-inline-note">First seen: ${escHtml(c.first_seen || "—")}</div>`;
+      evidenceHtml += `<div class="chart-inline-note">Last seen: ${escHtml(c.last_seen || "—")}</div>`;
+      evidenceHtml += `</div>`;
 
-      html += `</div>`;
-
-      html += `<div class="chart-inline-note">First seen: ${escHtml(c.first_seen || "—")}</div>`;
-      html += `<div class="chart-inline-note">Last seen: ${escHtml(c.last_seen || "—")}</div>`;
-
-      if (c.match_text) html += `<div class="chart-inline-note chart-inline-note--spaced">Known match: ${escHtml(c.match_text)}</div>`;
-
+      let technicalHtml = `<details class="drawer-technical-details">`;
+      technicalHtml += `<summary>Technical details</summary>`;
+      technicalHtml += `<div class="drawer-technical-body">`;
+      if (pressureLine) {
+        technicalHtml += `<div class="chart-inline-note">${escHtml(pressureLine)}${hasSuspiciousPressure ? ' <span class="pill info">High pressure seen</span>' : ""}</div>`;
+      }
+      if (avgRssi !== null || avgSnr !== null) {
+        const parts = [];
+        if (avgRssi !== null) parts.push(`Avg RSSI: ${avgRssi.toFixed(1)}`);
+        if (avgSnr !== null) parts.push(`Avg SNR: ${avgSnr.toFixed(1)}`);
+        technicalHtml += `<div class="chart-inline-note">${escHtml(parts.join(" · "))}</div>`;
+      }
+      if (c.match_text) {
+        technicalHtml += `<div class="chart-inline-note chart-inline-note--spaced">Known match: ${escHtml(c.match_text)}</div>`;
+      }
       if (sensorIds.length > 0) {
-        html += `<div class="chart-inline-note chart-inline-note--spaced">Sensor IDs: ${escHtml(sensorIds.join(", "))}</div>`;
+        technicalHtml += `<div class="chart-inline-note chart-inline-note--spaced">Sensor IDs: ${escHtml(sensorIds.join(", "))}</div>`;
       }
+      technicalHtml += `</div>`;
+      technicalHtml += `</details>`;
 
-      return html;
+      return summaryHtml + whyHtml + evidenceHtml + technicalHtml;
     }
 
     function filterTable(tableId, query) {
