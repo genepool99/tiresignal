@@ -136,16 +136,16 @@ def classify_presence_event(vehicle_pass):
     return "pass_by"
 
 
-def summarize_presence(vehicle_passes, now=None):
+def normalized_vehicle_passes(vehicle_passes):
     """
-    Derive a rolling 24-hour presence/traffic summary from vehicle_passes.
-
-    Pure and read-only: takes the same vehicle_passes shape produced by
-    group_vehicle_passes() and does not query the database or touch
-    rendering. Passes without a usable start timestamp are ignored.
+    Normalize vehicle_passes for the presence/traffic helpers below:
+    skips falsy entries and entries without a usable start timestamp,
+    normalizes naive start/end datetimes to UTC, and falls back to
+    start for a missing end. Returns a new list of shallow-copied
+    dicts; the input list/dicts are left untouched.
     """
 
-    valid_passes = []
+    normalized = []
 
     for vehicle_pass in vehicle_passes or []:
         start = vehicle_pass.get("start") if vehicle_pass else None
@@ -161,7 +161,21 @@ def summarize_presence(vehicle_passes, now=None):
         if end.tzinfo is None:
             end = end.replace(tzinfo=timezone.utc)
 
-        valid_passes.append({**vehicle_pass, "start": start, "end": end})
+        normalized.append({**vehicle_pass, "start": start, "end": end})
+
+    return normalized
+
+
+def summarize_presence(vehicle_passes, now=None):
+    """
+    Derive a rolling 24-hour presence/traffic summary from vehicle_passes.
+
+    Pure and read-only: takes the same vehicle_passes shape produced by
+    group_vehicle_passes() and does not query the database or touch
+    rendering. Passes without a usable start timestamp are ignored.
+    """
+
+    valid_passes = normalized_vehicle_passes(vehicle_passes)
 
     if now is None:
         latest = None
@@ -257,23 +271,7 @@ def build_presence_timeline(vehicle_passes, now=None):
     newest, regardless of how many passes fall in the window.
     """
 
-    valid_passes = []
-
-    for vehicle_pass in vehicle_passes or []:
-        start = vehicle_pass.get("start") if vehicle_pass else None
-
-        if not start:
-            continue
-
-        if start.tzinfo is None:
-            start = start.replace(tzinfo=timezone.utc)
-
-        end = vehicle_pass.get("end") or start
-
-        if end.tzinfo is None:
-            end = end.replace(tzinfo=timezone.utc)
-
-        valid_passes.append({**vehicle_pass, "start": start, "end": end})
+    valid_passes = normalized_vehicle_passes(vehicle_passes)
 
     if now is None:
         latest = None
@@ -331,6 +329,89 @@ def build_presence_timeline(vehicle_passes, now=None):
         "window_start": window_start.isoformat(),
         "window_end": now.isoformat(),
         "buckets": buckets,
+    }
+
+
+def build_traffic_heatmap(vehicle_passes, now=None, days=7):
+    """
+    Build a fixed-size, trailing N-day day/hour traffic heatmap from
+    vehicle_passes, using server-side aggregation (not raw events, and
+    not the capped client-side timeline_points).
+
+    Pure and read-only: same normalization/windowing approach as
+    summarize_presence() and build_presence_timeline(). Always returns
+    exactly days * 24 cells, oldest to newest, regardless of how many
+    passes fall in the window.
+    """
+
+    if not isinstance(days, int) or isinstance(days, bool) or days < 1:
+        days = 7
+
+    valid_passes = normalized_vehicle_passes(vehicle_passes)
+
+    if now is None:
+        latest = None
+
+        for vehicle_pass in valid_passes:
+            candidate = max(vehicle_pass["start"], vehicle_pass["end"])
+            if latest is None or candidate > latest:
+                latest = candidate
+
+        now = latest or datetime.now(timezone.utc)
+    elif now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+
+    window_start = now - timedelta(days=days)
+
+    cells = []
+    cells_by_key = {}
+
+    for offset in range(days * 24):
+        slot_start = (window_start + timedelta(hours=offset)).astimezone()
+        date_label = slot_start.strftime("%Y-%m-%d")
+        weekday_label = slot_start.strftime("%a")
+        hour_label = slot_start.strftime("%H:00")
+        key = (date_label, hour_label)
+
+        cell = {
+            "date": date_label,
+            "weekday": weekday_label,
+            "hour": hour_label,
+            "known": 0,
+            "lingering": 0,
+            "pass_by": 0,
+            "total": 0,
+        }
+
+        cells.append(cell)
+        cells_by_key.setdefault(key, cell)
+
+    for vehicle_pass in valid_passes:
+        start = vehicle_pass["start"]
+
+        if not (window_start <= start <= now):
+            continue
+
+        local_start = start.astimezone()
+        key = (local_start.strftime("%Y-%m-%d"), local_start.strftime("%H:00"))
+        cell = cells_by_key.get(key)
+
+        if cell is None:
+            continue
+
+        event_type = classify_presence_event(vehicle_pass)
+
+        if event_type not in ("known", "lingering", "pass_by"):
+            event_type = "pass_by"
+
+        cell[event_type] += 1
+        cell["total"] += 1
+
+    return {
+        "window_start": window_start.isoformat(),
+        "window_end": now.isoformat(),
+        "days": days,
+        "cells": cells,
     }
 
 

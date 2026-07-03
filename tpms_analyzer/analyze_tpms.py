@@ -6,6 +6,7 @@ from datetime import datetime
 import shutil
 from analysis import (
     build_presence_timeline,
+    build_traffic_heatmap,
     daily_counts,
     find_new_unknown_candidates,
     group_vehicle_passes,
@@ -58,6 +59,7 @@ def main():
     vehicle_passes = group_vehicle_passes(events, normalized_vehicles)
     presence_summary = summarize_presence(vehicle_passes)
     presence_timeline = build_presence_timeline(vehicle_passes)
+    traffic_heatmap = build_traffic_heatmap(vehicle_passes)
 
     exact_candidate_summaries = summarize_exact_candidates(
         vehicle_passes,
@@ -91,6 +93,7 @@ def main():
         "new_unknown_candidates": new_unknown_candidates,
         "presence_summary": presence_summary,
         "presence_timeline": presence_timeline,
+        "traffic_heatmap": traffic_heatmap,
         "daily_counts": daily_counts(events),
         "hourly_counts": hourly_counts(events),
         "ingest_stats": ingest_stats,

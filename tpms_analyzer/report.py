@@ -277,6 +277,7 @@ def write_report(context):
     prune_stats = context.get("prune_stats", {})
     presence_summary = context.get("presence_summary", {})
     presence_timeline = context.get("presence_timeline", {})
+    traffic_heatmap = context.get("traffic_heatmap", {})
 
     sensor_model_map = defaultdict(set)
     sensor_protocol_map = defaultdict(set)
@@ -383,6 +384,7 @@ def write_report(context):
     )
     html += presence_summary_section(presence_summary)
     html += presence_timeline_section(presence_timeline)
+    html += traffic_heatmap_section(traffic_heatmap)
     html += known_vehicle_section(known_vehicle_summaries)
 
     if ignored_vehicles:
@@ -759,6 +761,112 @@ def presence_timeline_section(presence_timeline):
             <div class="presence-timeline-segment presence-timeline-pass-by" style="height: {pass_by_pct:.2f}%"></div>
           </div>
           <div class="presence-timeline-hour-label">{safe_text(hour_label)}</div>
+        </div>
+"""
+
+    html += """
+      </div>
+    </div>
+"""
+
+    return html
+
+
+def traffic_heatmap_section(traffic_heatmap):
+    if not isinstance(traffic_heatmap, dict):
+        traffic_heatmap = {}
+
+    cells = traffic_heatmap.get("cells")
+
+    html = """
+    <div class="section">
+      <h2>Traffic Heatmap</h2>
+      <p class="muted">Hourly vehicle sighting intensity over the last 7 days.</p>
+"""
+
+    if not isinstance(cells, list) or not cells:
+        html += """
+      <p class="muted">Not enough traffic history yet.</p>
+    </div>
+"""
+        return html
+
+    def cell_int(cell, key):
+        value = cell.get(key) if isinstance(cell, dict) else None
+
+        if value is None:
+            return 0
+
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 0
+
+    max_total = 0
+
+    for cell in cells:
+        total = cell_int(cell, "total")
+        if total > max_total:
+            max_total = total
+
+    if max_total < 1:
+        max_total = 1
+
+    rows = []
+    rows_by_date = {}
+
+    for cell in cells:
+        date_label = cell.get("date") if isinstance(cell, dict) else None
+        date_label = date_label or "—"
+
+        row = rows_by_date.get(date_label)
+
+        if row is None:
+            weekday_label = cell.get("weekday") if isinstance(cell, dict) else None
+            row = {"date": date_label, "weekday": weekday_label or "", "cells": []}
+            rows_by_date[date_label] = row
+            rows.append(row)
+
+        row["cells"].append(cell)
+
+    html += """
+      <div class="traffic-heatmap">
+"""
+
+    for row in rows:
+        date_label = row["date"]
+        weekday_label = row["weekday"]
+        row_label = f"{weekday_label} {date_label}".strip() if weekday_label else date_label
+
+        html += f"""
+        <div class="traffic-heatmap-row">
+          <div class="traffic-heatmap-row-label">{safe_text(row_label)}</div>
+          <div class="traffic-heatmap-row-cells">
+"""
+
+        for cell in row["cells"]:
+            hour_label = cell.get("hour") if isinstance(cell, dict) else None
+            hour_label = hour_label or "—"
+
+            known = cell_int(cell, "known")
+            lingering = cell_int(cell, "lingering")
+            pass_by = cell_int(cell, "pass_by")
+            total = cell_int(cell, "total")
+
+            intensity = total / max_total
+            count_text = str(total) if total > 0 else ""
+
+            title_text = (
+                f"{date_label} {hour_label} — total {total}, known {known}, "
+                f"lingering {lingering}, pass-by {pass_by}"
+            )
+
+            html += f"""
+            <div class="traffic-heatmap-cell" title="{safe_text(title_text)}" style="--traffic-intensity: {intensity:.2f};">{safe_text(count_text)}</div>
+"""
+
+        html += """
+          </div>
         </div>
 """
 

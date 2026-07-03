@@ -323,6 +323,90 @@ CSS_BLOCK = """
       }
     }
 
+    /*
+      Traffic Heatmap: a compact day/hour intensity grid. Classes
+      report.py actually emits: .traffic-heatmap, .traffic-heatmap-row,
+      .traffic-heatmap-row-label, .traffic-heatmap-row-cells,
+      .traffic-heatmap-cell (with an inline --traffic-intensity custom
+      property). .traffic-heatmap-date/.traffic-heatmap-cells are also
+      included as aliases in case the markup naming is adjusted later.
+    */
+    .traffic-heatmap {
+      overflow-x: auto;
+      margin: 14px 0 6px;
+      padding-bottom: 4px;
+    }
+
+    .traffic-heatmap-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 2px 0;
+    }
+
+    .traffic-heatmap-row-label,
+    .traffic-heatmap-date {
+      flex: 0 0 auto;
+      min-width: 92px;
+      font-size: 11px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    .traffic-heatmap-row-cells,
+    .traffic-heatmap-cells {
+      flex: 1 1 auto;
+      display: grid;
+      grid-template-columns: repeat(24, minmax(24px, 1fr));
+      gap: 3px;
+      min-width: 624px;
+    }
+
+    .traffic-heatmap-cell {
+      position: relative;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--accent-soft);
+      color: var(--text);
+      font-size: 10px;
+      font-weight: 600;
+      line-height: 1;
+      overflow: hidden;
+    }
+
+    .traffic-heatmap-cell::before {
+      /*
+        A separate layer (not the cell's own background/opacity) so the
+        count text and border stay fully readable at every intensity.
+        z-index: -1 keeps this behind the cell's in-flow text content
+        regardless of default paint order for position: absolute
+        siblings with z-index: auto.
+      */
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      background: var(--accent);
+      opacity: calc(0.12 + (var(--traffic-intensity, 0) * 0.78));
+    }
+
+    @media (max-width: 640px) {
+      .traffic-heatmap-row-label,
+      .traffic-heatmap-date {
+        min-width: 68px;
+        font-size: 10px;
+      }
+
+      .traffic-heatmap-cell {
+        height: 18px;
+        font-size: 9px;
+      }
+    }
+
     .toolbar {
       display: flex;
       gap: 12px;
