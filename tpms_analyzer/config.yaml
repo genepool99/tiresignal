@@ -1,5 +1,5 @@
 name: TireSignal
-version: "0.3.16"
+version: "0.3.17"
 slug: tpms_analyzer
 description: Home Assistant-friendly TPMS monitoring and analysis powered by rtl_433.
 url: https://github.com/genepool99/tiresignal

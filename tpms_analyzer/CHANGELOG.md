@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.3.17
+
+### Added
+
+- Added Details row actions to Exact Repeat Sensor Groups.
+- Added Details row actions to Unlabeled Repeat Candidates.
+- Added Details row actions to Known & Watchlist Vehicles.
+
+### Changed
+
+- Improved Candidate Details drawer category labels so saved vehicle categories display as Known, Watch, and Ignored while preserving existing pill styling.
+
+### Fixed
+
+- Restored keyboard focus to the visible row action button after closing the Candidate Details drawer.
+
 ## 0.3.16
 
 ### Added
