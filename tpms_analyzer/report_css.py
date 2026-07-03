@@ -375,7 +375,17 @@ CSS_BLOCK = """
     }
 
     .traffic-heatmap-cell {
+      /*
+        position: relative alone does not establish a stacking context
+        (only position + a real z-index value does). Without an explicit
+        z-index here, ::before's negative z-index below would escape to
+        the nearest ancestor stacking context and paint behind this
+        cell's own opaque background instead of just behind its text,
+        making the intensity fill invisible. z-index: 0 fixes that by
+        containing ::before's stacking calculation to this cell only.
+      */
       position: relative;
+      z-index: 0;
       height: 22px;
       display: flex;
       align-items: center;
@@ -394,16 +404,18 @@ CSS_BLOCK = """
       /*
         A separate layer (not the cell's own background/opacity) so the
         count text and border stay fully readable at every intensity.
-        z-index: -1 keeps this behind the cell's in-flow text content
-        regardless of default paint order for position: absolute
-        siblings with z-index: auto.
+        The count text is a bare text node (no wrapping element), so it
+        cannot be promoted above this layer with its own z-index; instead
+        z-index: -1 here (now correctly scoped by the cell's z-index: 0
+        above) keeps this layer above the cell's own background but below
+        its in-flow text content, per normal CSS paint order.
       */
       content: "";
       position: absolute;
       inset: 0;
       z-index: -1;
       background: var(--accent);
-      opacity: calc(0.22 + (var(--traffic-intensity, 0) * 0.68));
+      opacity: calc(0.28 + (var(--traffic-intensity, 0) * 0.62));
     }
 
     @media (max-width: 640px) {
