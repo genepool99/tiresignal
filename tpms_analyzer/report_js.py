@@ -417,7 +417,9 @@ JS_BLOCK = """    function getServiceBaseUrl() {
     let candidateDrawerOpener = null;
 
     function openCandidateDrawer(button) {
-      candidateDrawerOpener = button;
+      const wrapper = button.closest(".row-actions");
+      const toggle = wrapper ? wrapper.querySelector(".row-actions-toggle") : null;
+      candidateDrawerOpener = toggle;
       closeAllRowActionsMenus();
       const candidate = JSON.parse(button.dataset.candidate || "{}");
       const drawer = document.getElementById("candidateDrawer");
