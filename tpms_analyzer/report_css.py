@@ -844,6 +844,25 @@ CSS_BLOCK = """
       flex-wrap: wrap;
     }
 
+    @media (max-width: 640px) {
+      .header-row {
+        justify-content: flex-start;
+        align-items: flex-start;
+      }
+      .header-brand-group {
+        width: 100%;
+        gap: 10px;
+      }
+      .header-meta {
+        width: 100%;
+        gap: 6px;
+      }
+      .refresh-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+
     .refresh-button {
       border: 1px solid var(--accent-strong);
       border-radius: 10px;
