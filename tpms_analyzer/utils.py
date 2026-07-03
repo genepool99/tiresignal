@@ -255,7 +255,7 @@ def compute_signal_tags(candidate, sensor_lookup):
         and (datetime.now(timezone.utc) - last_seen).days <= 14
     ):
         add_tag(
-            "Poss. Stalker",
+            "Possible  Stalker",
             "pattern-stalker",
             "Repeated unknown signal seen across multiple days and still recently active.",
         )

@@ -99,7 +99,7 @@
 ### Added
 
 - Added rule-based unknown-candidate tags for recurring behavior patterns:
-  - "Poss. Stalker" for persistent unknown signals seen across multiple days and still recently active.
+  - "Possible  Stalker" for persistent unknown signals seen across multiple days and still recently active.
   - "Weekend Warrior" for unknown signals seen mostly on weekends.
   - "Commuter" for unknown signals seen mostly on weekdays.
 - Added quick filters to the Candidates page for confidence levels and signal/pattern tags.

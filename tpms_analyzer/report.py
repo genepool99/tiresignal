@@ -177,7 +177,7 @@ def pattern_label_class(label_text):
         "Went quiet": "pattern-quiet",
         "Occasional visitor": "pattern-occasional",
         "Mixed sensor types": "pattern-mixed",
-        "Poss. Stalker": "pattern-stalker",
+        "Possible  Stalker": "pattern-stalker",
         "Weekend Warrior": "pattern-weekend",
         "Commuter": "pattern-commuter",
     }
@@ -206,7 +206,7 @@ PATTERN_LABEL_DESCRIPTIONS = {
     "Maybe a fluke": "Only a few repeated passes so far. Could be a coincidence.",
     "Went quiet": "Not seen recently relative to this report.",
     "Occasional visitor": "Seen over an extended period, but not very often.",
-    "Poss. Stalker": "Repeated unknown signal seen across multiple days and still recently active.",
+    "Possible  Stalker": "Repeated unknown signal seen across multiple days and still recently active.",
     "Weekend Warrior": "Unknown signal appears mostly on weekends.",
     "Commuter": "Unknown signal appears mostly on weekdays.",
 }
@@ -1120,14 +1120,14 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, s
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Strong', 'info')">Strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Possible', 'info')">Possible</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'High-Confidence Unknown', '')">High-Confidence Unknown</button>
-        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Poss. Stalker', '')">Poss. Stalker</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Possible  Stalker', '')">Possible  Stalker</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Commuter', '')">Commuter</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
         <button type="button" class="inline-info-button"
           onclick="openInfoModal(this)"
           data-info-title="About the signal filters"
-          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Poss. Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
+          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Possible  Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
         >Signal filters explained</button>
         </div>
       </div>
@@ -1249,14 +1249,14 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Strong', 'confidence')">Strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Possible', 'confidence')">Possible</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'High-Confidence Unknown', '')">High-Confidence Unknown</button>
-        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Poss. Stalker', '')">Poss. Stalker</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Possible  Stalker', '')">Possible  Stalker</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Commuter', '')">Commuter</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
         <button type="button" class="inline-info-button"
           onclick="openInfoModal(this)"
           data-info-title="About the signal filters"
-          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Poss. Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
+          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Possible  Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
         >Signal filters explained</button>
         </div>
       </div>
@@ -1414,14 +1414,14 @@ def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=No
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Strong', 'info')">Strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Possible', 'info')">Possible</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'High-Confidence Unknown', '')">High-Confidence Unknown</button>
-        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Poss. Stalker', '')">Poss. Stalker</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Possible  Stalker', '')">Possible  Stalker</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Commuter', '')">Commuter</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
         <button type="button" class="inline-info-button"
           onclick="openInfoModal(this)"
           data-info-title="About the signal filters"
-          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Poss. Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
+          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Possible  Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
         >Signal filters explained</button>
         </div>
       </div>
