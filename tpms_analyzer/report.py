@@ -969,6 +969,21 @@ def known_vehicle_section(rows):
         menu_items.append({"label": "Ignore", "payload": ignore_payload, "handler": "rowMenuSubmitAction"})
         menu_items.append({"label": "Delete", "payload": remove_payload, "handler": "rowMenuSubmitAction", "danger": True})
 
+        details_payload = {
+            "title": row["name"],
+            "confidence": "",
+            "category": row["category"],
+            "known_vehicle": "",
+            "match_text": "",
+            "sensor_count": len(sensor_ids),
+            "pass_count": row["seen_count"],
+            "first_seen": display_time(row["first_seen"]),
+            "last_seen": display_time(row["last_seen"]),
+            "sensor_ids": sensor_ids,
+            "pattern_labels": [],
+        }
+        menu_items.append({"label": "Details", "payload": details_payload, "handler": "openCandidateDrawer", "data_attr": "candidate"})
+
         html += f"""
           <tr>
             <td>{safe_text(row["name"])}</td>
