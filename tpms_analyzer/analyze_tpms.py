@@ -14,6 +14,7 @@ from analysis import (
     summarize_exact_candidates,
     summarize_known_vehicles,
     summarize_overlap_candidates,
+    summarize_presence,
     summarize_sensors,
 )
 from db import backfill_maybe_battery, backfill_temperature_c, connect_db, ingest_log, init_db, load_events, prune_events
@@ -54,6 +55,7 @@ def main():
 
     sensor_summaries = summarize_sensors(events, sensor_to_vehicle)
     vehicle_passes = group_vehicle_passes(events, normalized_vehicles)
+    presence_summary = summarize_presence(vehicle_passes)
 
     exact_candidate_summaries = summarize_exact_candidates(
         vehicle_passes,
@@ -85,6 +87,7 @@ def main():
         "overlap_candidate_summaries": overlap_candidate_summaries,
         "known_vehicle_summaries": known_vehicle_summaries,
         "new_unknown_candidates": new_unknown_candidates,
+        "presence_summary": presence_summary,
         "daily_counts": daily_counts(events),
         "hourly_counts": hourly_counts(events),
         "ingest_stats": ingest_stats,

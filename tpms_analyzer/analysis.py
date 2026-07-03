@@ -1,5 +1,5 @@
 from collections import Counter, defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from tpms_config import (
     MAX_RECENT_EVENTS,
@@ -115,6 +115,122 @@ def group_vehicle_passes(events, normalized_vehicles, window_seconds=PASS_WINDOW
 
     vehicle_passes.sort(key=lambda r: r["start"], reverse=True)
     return vehicle_passes
+
+
+def summarize_presence(vehicle_passes, now=None):
+    """
+    Derive a rolling 24-hour presence/traffic summary from vehicle_passes.
+
+    Pure and read-only: takes the same vehicle_passes shape produced by
+    group_vehicle_passes() and does not query the database or touch
+    rendering. Passes without a usable start timestamp are ignored.
+    """
+
+    valid_passes = []
+
+    for vehicle_pass in vehicle_passes or []:
+        start = vehicle_pass.get("start") if vehicle_pass else None
+
+        if not start:
+            continue
+
+        if start.tzinfo is None:
+            start = start.replace(tzinfo=timezone.utc)
+
+        end = vehicle_pass.get("end") or start
+
+        if end.tzinfo is None:
+            end = end.replace(tzinfo=timezone.utc)
+
+        valid_passes.append({**vehicle_pass, "start": start, "end": end})
+
+    if now is None:
+        latest = None
+
+        for vehicle_pass in valid_passes:
+            candidate = max(vehicle_pass["start"], vehicle_pass["end"])
+            if latest is None or candidate > latest:
+                latest = candidate
+
+        now = latest or datetime.now(timezone.utc)
+    elif now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+
+    window_start = now - timedelta(hours=24)
+
+    window_passes = [
+        vehicle_pass for vehicle_pass in valid_passes
+        if window_start <= vehicle_pass["start"] <= now
+    ]
+
+    known_24h = 0
+    unknown_24h = 0
+    lingering_24h = 0
+    hour_counts = Counter()
+
+    for vehicle_pass in window_passes:
+        known_vehicle = vehicle_pass.get("known_vehicle")
+        duration_seconds = vehicle_pass.get("duration_seconds") or 0
+
+        if known_vehicle:
+            known_24h += 1
+        else:
+            unknown_24h += 1
+
+        if duration_seconds >= 300:
+            lingering_24h += 1
+
+        hour_counts[vehicle_pass["start"].astimezone().strftime("%H:00")] += 1
+
+    if hour_counts:
+        busiest_hour, busiest_hour_count = sorted(
+            hour_counts.items(),
+            key=lambda item: (-item[1], item[0]),
+        )[0]
+    else:
+        busiest_hour, busiest_hour_count = None, 0
+
+    window_passes.sort(key=lambda p: p["start"], reverse=True)
+
+    recent_events = []
+
+    for vehicle_pass in window_passes[:25]:
+        sensor_ids = vehicle_pass.get("sensor_ids") or []
+        duration_seconds = vehicle_pass.get("duration_seconds") or 0
+        known_vehicle = vehicle_pass.get("known_vehicle") or ""
+        sensor_count = vehicle_pass.get("sensor_count")
+
+        if sensor_count is None:
+            sensor_count = len(sensor_ids)
+
+        if known_vehicle:
+            event_type = "known"
+        elif duration_seconds >= 300:
+            event_type = "lingering"
+        else:
+            event_type = "pass_by"
+
+        recent_events.append({
+            "start": vehicle_pass["start"].isoformat(),
+            "end": vehicle_pass["end"].isoformat(),
+            "duration_seconds": duration_seconds,
+            "sensor_ids": sensor_ids,
+            "sensor_count": sensor_count,
+            "known_vehicle": known_vehicle,
+            "category": vehicle_pass.get("category") or "",
+            "confidence": vehicle_pass.get("confidence") or "",
+            "event_type": event_type,
+        })
+
+    return {
+        "total_24h": len(window_passes),
+        "known_24h": known_24h,
+        "unknown_24h": unknown_24h,
+        "lingering_24h": lingering_24h,
+        "busiest_hour": busiest_hour,
+        "busiest_hour_count": busiest_hour_count,
+        "recent_events": recent_events,
+    }
 
 
 def summarize_exact_candidates(vehicle_passes, normalized_vehicles):

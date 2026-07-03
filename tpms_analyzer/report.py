@@ -275,6 +275,7 @@ def write_report(context):
     vehicles = context["vehicles"]
     ingest_stats = context["ingest_stats"]
     prune_stats = context.get("prune_stats", {})
+    presence_summary = context.get("presence_summary", {})
 
     sensor_model_map = defaultdict(set)
     sensor_protocol_map = defaultdict(set)
@@ -379,6 +380,7 @@ def write_report(context):
         ignore_count=ignore_count,
         ingest_stats=ingest_stats,
     )
+    html += presence_summary_section(presence_summary)
     html += known_vehicle_section(known_vehicle_summaries)
 
     if ignored_vehicles:
@@ -561,6 +563,122 @@ def summary_cards(
       </div>
     </div>
 """
+
+
+def presence_summary_section(presence_summary):
+    if not isinstance(presence_summary, dict):
+        presence_summary = {}
+
+    total_24h = presence_summary.get("total_24h") or 0
+    known_24h = presence_summary.get("known_24h") or 0
+    unknown_24h = presence_summary.get("unknown_24h") or 0
+    lingering_24h = presence_summary.get("lingering_24h") or 0
+    busiest_hour = presence_summary.get("busiest_hour")
+    busiest_hour_count = presence_summary.get("busiest_hour_count") or 0
+
+    if busiest_hour:
+        busiest_hour_text = f"{busiest_hour} ({busiest_hour_count} sightings)"
+    else:
+        busiest_hour_text = "—"
+
+    html = f"""
+    <div class="section">
+      <h2>Presence &amp; Traffic</h2>
+      <p class="muted">Last 24 hours of TPMS-derived vehicle sightings.</p>
+      <div class="cards">
+        <div class="card">
+          <div class="big">{safe_text(total_24h)}</div>
+          <div>Total Sightings</div>
+        </div>
+        <div class="card">
+          <div class="big">{safe_text(known_24h)}</div>
+          <div>Known Vehicle Sightings</div>
+        </div>
+        <div class="card">
+          <div class="big">{safe_text(unknown_24h)}</div>
+          <div>Unknown Sightings</div>
+        </div>
+        <div class="card">
+          <div class="big">{safe_text(lingering_24h)}</div>
+          <div>Lingering Events</div>
+        </div>
+        <div class="card">
+          <div class="big">{safe_text(busiest_hour_text)}</div>
+          <div>Busiest Hour</div>
+        </div>
+      </div>
+"""
+
+    recent_events = presence_summary.get("recent_events")
+
+    if not isinstance(recent_events, list) or not recent_events:
+        html += """
+      <p class="muted">No recent presence events in the last 24 hours.</p>
+    </div>
+"""
+        return html
+
+    event_type_labels = {
+        "known": "Known",
+        "lingering": "Lingering",
+        "pass_by": "Pass-by",
+    }
+
+    html += """
+      <h3>Recent presence events</h3>
+      <table id="presenceRecentEventsTable">
+        <thead>
+          <tr>
+            <th>Time</th>
+            <th>Type</th>
+            <th>Vehicle / Group</th>
+            <th>Duration</th>
+            <th>Sensors</th>
+            <th>Confidence</th>
+          </tr>
+        </thead>
+        <tbody>
+"""
+
+    for event in recent_events:
+        if not isinstance(event, dict):
+            continue
+
+        event_type = event.get("event_type") or ""
+        type_label = event_type_labels.get(event_type) or (event_type.replace("_", " ").title() or "—")
+
+        known_vehicle = event.get("known_vehicle") or ""
+        vehicle_text = known_vehicle or "Unknown group"
+
+        duration_seconds = event.get("duration_seconds")
+        if duration_seconds is None:
+            duration_seconds = 0
+
+        sensor_ids = event.get("sensor_ids") or []
+        sensor_count = event.get("sensor_count")
+        if sensor_count is None:
+            sensor_count = len(sensor_ids)
+
+        confidence = event.get("confidence") or "—"
+
+        html += f"""
+          <tr>
+            <td>{display_time(event.get("start"))}</td>
+            <td>{safe_text(type_label)}</td>
+            <td>{safe_text(vehicle_text)}</td>
+            <td>{safe_text(duration_seconds)}s</td>
+            <td>{safe_text(sensor_count)}</td>
+            <td>{safe_text(confidence)}</td>
+          </tr>
+"""
+
+    html += """
+        </tbody>
+      </table>
+    </div>
+"""
+
+    return html
 
 
 def known_vehicle_section(rows):
