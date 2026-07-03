@@ -607,7 +607,7 @@ def presence_summary_section(presence_summary):
           <div>Lingering Events</div>
         </div>
         <div class="card">
-          <div class="big">{safe_text(busiest_hour_text)}</div>
+          <div class="big big-compact">{safe_text(busiest_hour_text)}</div>
           <div>Busiest Hour</div>
         </div>
       </div>

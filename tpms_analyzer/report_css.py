@@ -81,6 +81,18 @@ CSS_BLOCK = """
       line-height: 1.1;
     }
 
+    .big-compact {
+      font-size: 22px;
+      line-height: 1.15;
+      overflow-wrap: normal;
+    }
+
+    @media (max-width: 640px) {
+      .big-compact {
+        font-size: 18px;
+      }
+    }
+
     .section {
       border: 1px solid var(--border);
       border-radius: 14px;
@@ -237,12 +249,12 @@ CSS_BLOCK = """
 
     .presence-timeline-legend-item.presence-timeline-lingering::before,
     .presence-timeline-legend-item.presence-timeline-lingering .presence-timeline-legend-swatch {
-      background: var(--unknown-text);
+      background: var(--info-text);
     }
 
     .presence-timeline-legend-item.presence-timeline-pass-by::before,
     .presence-timeline-legend-item.presence-timeline-pass-by .presence-timeline-legend-swatch {
-      background: var(--muted);
+      background: var(--ignore-text);
     }
 
     .presence-timeline-bucket,
@@ -292,12 +304,12 @@ CSS_BLOCK = """
 
     .presence-timeline-segment.presence-timeline-lingering,
     .presence-timeline-segment-lingering {
-      background: var(--unknown-text);
+      background: var(--info-text);
     }
 
     .presence-timeline-segment.presence-timeline-pass-by,
     .presence-timeline-segment-pass-by {
-      background: var(--muted);
+      background: var(--ignore-text);
     }
 
     .presence-timeline-hour-label {
@@ -391,7 +403,7 @@ CSS_BLOCK = """
       inset: 0;
       z-index: -1;
       background: var(--accent);
-      opacity: calc(0.12 + (var(--traffic-intensity, 0) * 0.78));
+      opacity: calc(0.22 + (var(--traffic-intensity, 0) * 0.68));
     }
 
     @media (max-width: 640px) {
