@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.3.16
+
+### Added
+
+- Added a Presence & Traffic overview section with last-24-hour TPMS-derived vehicle sighting metrics.
+- Added a collapsible Recent presence events table using the existing report section expand/collapse pattern.
+- Added a 24-hour Presence Timeline for known vehicles, lingering events, and pass-by traffic.
+- Added a 7-day hourly Traffic Heatmap to visualize vehicle traffic intensity patterns.
+
+### Changed
+
+- Improved the Overview tab to better support home-security and traffic-awareness use cases.
+- Aggregated presence and traffic visualizations from grouped vehicle passes instead of raw packet counts.
+- Improved Presence Timeline category colors for clearer Known, Lingering, and Pass-by differentiation.
+- Improved Traffic Heatmap intensity rendering so activity levels are easier to see.
+- Adjusted Busiest Hour card typography so longer values fit cleanly.
+
+### Compatibility
+
+- Kept database schema, raw event ingest, vehicle mapping format, existing report tabs, and existing candidate matching behavior unchanged.
+- Kept the new visualizations server-rendered without adding JavaScript dependencies.
+
 ## 0.3.15
 
 ### Added
