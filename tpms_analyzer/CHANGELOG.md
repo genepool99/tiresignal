@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.3.15
+
+### Added
+
+- Added a GitHub icon link to the report header after the Source pill.
+- Added signal-filter explanation help links for Candidate quick filters.
+- Added drawer explanations for signal tags that previously lacked visible detail text.
+
+### Changed
+
+- Redesigned the Candidate Details drawer to improve hierarchy and reduce information overload.
+- Grouped drawer content into summary, explanation, evidence, and technical details sections.
+- Moved lower-priority technical fields into a collapsed Technical details section.
+- Improved Candidate Details drawer spacing, section dividers, hint rows, and long sensor ID wrapping.
+- Moved the Signal filters explained help link into the filter row after the Signal Lurker filter.
+
+### Fixed
+
+- Fixed Candidate Details drawer signal tags, such as "High-Confidence Unknown", showing without explanatory text.
+
+### Compatibility
+
+- Kept existing report output filenames, database schema, runtime paths, service routes, candidate matching logic, row actions, drawer open/close behavior, modal behavior, filter behavior, vehicle actions, and refresh behavior unchanged.
+- UI changes are presentation-only and do not change TPMS ingest, clustering, or vehicle mapping behavior.
+
 ## 0.3.14
 
 ### Added
