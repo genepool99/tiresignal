@@ -611,6 +611,16 @@ def presence_summary_section(presence_summary):
           <div>Busiest Hour</div>
         </div>
       </div>
+    </div>
+
+    <details class="section" open>
+      <summary class="section-summary">
+        <span class="section-summary-main">
+          <span class="section-summary-title">Recent presence events</span>
+          <span class="section-summary-subtitle">Click to expand or collapse this section</span>
+        </span>
+        <span class="section-summary-action" aria-hidden="true"></span>
+      </summary>
 """
 
     recent_events = presence_summary.get("recent_events")
@@ -618,7 +628,7 @@ def presence_summary_section(presence_summary):
     if not isinstance(recent_events, list) or not recent_events:
         html += """
       <p class="muted">No recent presence events in the last 24 hours.</p>
-    </div>
+    </details>
 """
         return html
 
@@ -679,7 +689,7 @@ def presence_summary_section(presence_summary):
     html += """
         </tbody>
       </table>
-    </div>
+    </details>
 """
 
     return html
