@@ -1468,6 +1468,21 @@ def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=No
             all_labels.extend(compute_signal_tags(row, sensor_by_id))
         exact_signals_html = pattern_pills(all_labels) if all_labels else '<span class="muted">—</span>'
 
+        details_payload = {
+            "title": known_vehicle or f"Exact Repeat Candidate {index}",
+            "confidence": row["confidence"],
+            "category": category,
+            "known_vehicle": known_vehicle,
+            "match_text": known_match_text(row["known_match"]),
+            "sensor_count": row["sensor_count"],
+            "pass_count": row["pass_count"],
+            "first_seen": display_time(row["first_seen"]),
+            "last_seen": display_time(row["last_seen"]),
+            "sensor_ids": sensor_ids,
+            "pattern_labels": all_labels,
+        }
+        menu_items.append({"label": "Details", "payload": details_payload, "handler": "openCandidateDrawer", "data_attr": "candidate"})
+
         html += f"""
           <tr>
             <td>{saved_match_html(row["known_vehicle"], row["category"], row["known_match"])}</td>
