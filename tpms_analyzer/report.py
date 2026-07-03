@@ -447,20 +447,21 @@ def html_start(generated_at):
   <link rel="apple-touch-icon" sizes="180x180" href="tiresignal-favicon-180.png">
   <style>{CSS_BLOCK}
 .brand-title {{ margin: 0; line-height: 1; }}
-.brand-logo {{ height: 90px; width: auto; display: block; }}
+.brand-logo {{ height: 64px; width: auto; display: block; }}
 @media (max-width: 480px) {{ .brand-logo {{ height: 36px; }} }}
 .brand-logo-button {{ display: block; background: none; border: none; padding: 0; margin: 0; cursor: pointer; border-radius: 10px; }}
 .brand-logo-button:focus-visible {{ outline: 3px solid rgba(37, 99, 235, 0.35); outline-offset: 3px; }}
-.header-brand-group {{ display: flex; align-items: center; gap: 16px; flex-wrap: wrap; min-width: 0; }}
-.header-meta {{ display: flex; flex-direction: column; align-items: flex-start; gap: 4px; margin-top: 0; min-width: 0; }}
+.header-brand-group {{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; flex-shrink: 0; }}
+.header-meta {{ display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-top: 0; min-width: 0; text-align: right; }}
 .header-meta-line {{ display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; line-height: 1.4; font-weight: 700; color: var(--text); }}
 .header-meta-separator {{ color: var(--muted); font-weight: 700; }}
-.header-source {{ max-width: min(720px, 100%); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 1.4; color: var(--muted); }}
+.header-source {{ max-width: min(720px, 100%); width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 1.4; color: var(--muted); }}
 .header-source code {{ font-size: 11px; color: var(--muted); background: transparent; padding: 0; }}
-.header-github-link {{ display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: #ffffff; color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow-sm); text-decoration: none; flex-shrink: 0; }}
+.header-github-link {{ display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: #ffffff; color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow-sm); text-decoration: none; flex-shrink: 0; transform: translateY(4px); }}
 .header-github-link:hover {{ background: var(--soft); border-color: var(--muted); }}
 .header-github-link:focus-visible {{ outline: 3px solid rgba(37, 99, 235, 0.35); outline-offset: 3px; }}
 .header-github-link svg {{ display: block; }}
+.header-actions {{ display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; margin-left: auto; min-width: 0; }}
   </style>
 </head>
 <body>
@@ -481,26 +482,27 @@ def html_start(generated_at):
             <img class="brand-logo" src="tiresignal-report-logo.png" alt="TireSignal">
           </button>
         </h1>
+        <a class="header-github-link" href="https://github.com/genepool99/tiresignal" target="_blank" rel="noopener noreferrer" title="View on GitHub" aria-label="View TireSignal on GitHub">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 4.58c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+          </svg>
+        </a>
+      </div>
+      <div class="header-actions">
         <div class="header-meta">
           <div class="header-meta-line">
             <span>Generated {safe_text(generated_at)}</span>
             <span class="header-meta-separator" aria-hidden="true">&middot;</span>
-            <span>v{safe_text(APP_VERSION)}</span>
-            <span class="header-meta-separator" aria-hidden="true">&middot;</span>
-            <a class="header-github-link" href="https://github.com/genepool99/tiresignal" target="_blank" rel="noopener noreferrer" title="View on GitHub" aria-label="View TireSignal on GitHub">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 4.58c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
-              </svg>
-            </a>
+            <span>Version v{safe_text(APP_VERSION)}</span>
           </div>
           <div class="header-source" title="{safe_text(LOG_PATH)}">
             Source: <code>{safe_text(LOG_PATH)}</code>
           </div>
         </div>
+        <button id="refreshButton" class="refresh-button" onclick="refreshReport()">
+          Refresh Report
+        </button>
       </div>
-      <button id="refreshButton" class="refresh-button" onclick="refreshReport()">
-        Refresh Report
-      </button>
     </div>
   </header>
 

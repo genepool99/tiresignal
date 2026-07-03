@@ -32,7 +32,7 @@ CSS_BLOCK = """
     }
 
     header {
-      padding: 14px 24px;
+      padding: 8px 20px;
       background: linear-gradient(to bottom, #ffffff, #f5f8ff);
       border-bottom: 1px solid var(--border);
       position: sticky;
@@ -853,13 +853,20 @@ CSS_BLOCK = """
         width: 100%;
         gap: 10px;
       }
+      .header-actions {
+        width: 100%;
+        justify-content: flex-start;
+        align-items: stretch;
+      }
       .header-meta {
         width: 100%;
-        gap: 6px;
+        align-items: flex-start;
+        text-align: left;
+        gap: 3px;
       }
       .refresh-button {
-        width: 100%;
-        justify-content: center;
+        flex: 1;
+        min-width: 180px;
       }
     }
 
