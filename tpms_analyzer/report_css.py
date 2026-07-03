@@ -176,6 +176,153 @@ CSS_BLOCK = """
       margin: 12px 0 24px;
     }
 
+    /*
+      Presence Timeline: a small, subtle 24-bucket hourly strip, not a
+      full chart. .presence-timeline-track/.presence-timeline-bar-wrap/
+      .presence-timeline-legend-swatch/.presence-timeline-segment-known/
+      .presence-timeline-segment-lingering/.presence-timeline-segment-pass-by
+      are included alongside the classes report.py currently emits
+      (.presence-timeline, .presence-timeline-bucket,
+      .presence-timeline-segment + known/lingering/pass-by modifiers) so
+      this stays in sync if the markup is ever adjusted.
+    */
+    .presence-timeline,
+    .presence-timeline-track {
+      display: flex;
+      align-items: flex-end;
+      gap: 3px;
+      margin: 14px 0 6px;
+      padding: 4px 2px 0;
+      overflow-x: auto;
+    }
+
+    .presence-timeline-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      font-size: 12px;
+      color: var(--muted);
+      margin: 12px 0 4px;
+    }
+
+    .presence-timeline-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .presence-timeline-legend-item::before {
+      content: "";
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .presence-timeline-legend-swatch {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+      background: var(--muted);
+      flex-shrink: 0;
+    }
+
+    .presence-timeline-legend-item.presence-timeline-known::before,
+    .presence-timeline-legend-item.presence-timeline-known .presence-timeline-legend-swatch {
+      background: var(--known-text);
+    }
+
+    .presence-timeline-legend-item.presence-timeline-lingering::before,
+    .presence-timeline-legend-item.presence-timeline-lingering .presence-timeline-legend-swatch {
+      background: var(--unknown-text);
+    }
+
+    .presence-timeline-legend-item.presence-timeline-pass-by::before,
+    .presence-timeline-legend-item.presence-timeline-pass-by .presence-timeline-legend-swatch {
+      background: var(--muted);
+    }
+
+    .presence-timeline-bucket,
+    .presence-timeline-bar-wrap {
+      display: grid;
+      grid-template-rows: 96px auto;
+      row-gap: 4px;
+      flex: 1 1 0;
+      min-width: 6px;
+      text-align: center;
+    }
+
+    .presence-timeline-bar {
+      /*
+        report.py sets an inline height percentage on this element
+        (count/max_total, meant to read against the full 96px track).
+        min-height: 100% keeps that reference frame correct: the inner
+        segments are already each sized as their own share of the
+        busiest hour, so letting them stack from the bottom of a
+        full-height box reproduces the "shorter bar for quieter hours"
+        effect without the percentages compounding against an
+        already-shrunk box.
+      */
+      min-height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column-reverse;
+      align-items: stretch;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--soft);
+      overflow: hidden;
+    }
+
+    .presence-timeline-segment,
+    .presence-timeline-segment-known,
+    .presence-timeline-segment-lingering,
+    .presence-timeline-segment-pass-by {
+      width: 100%;
+      flex-shrink: 0;
+    }
+
+    .presence-timeline-segment.presence-timeline-known,
+    .presence-timeline-segment-known {
+      background: var(--known-text);
+    }
+
+    .presence-timeline-segment.presence-timeline-lingering,
+    .presence-timeline-segment-lingering {
+      background: var(--unknown-text);
+    }
+
+    .presence-timeline-segment.presence-timeline-pass-by,
+    .presence-timeline-segment-pass-by {
+      background: var(--muted);
+    }
+
+    .presence-timeline-hour-label {
+      font-size: 10px;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+
+    @media (max-width: 640px) {
+      .presence-timeline,
+      .presence-timeline-track {
+        gap: 2px;
+      }
+
+      .presence-timeline-bucket,
+      .presence-timeline-bar-wrap {
+        grid-template-rows: 64px auto;
+        min-width: 4px;
+      }
+
+      .presence-timeline-hour-label {
+        font-size: 9px;
+      }
+    }
+
     .toolbar {
       display: flex;
       gap: 12px;

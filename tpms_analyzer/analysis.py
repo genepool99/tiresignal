@@ -117,6 +117,25 @@ def group_vehicle_passes(events, normalized_vehicles, window_seconds=PASS_WINDOW
     return vehicle_passes
 
 
+def classify_presence_event(vehicle_pass):
+    """
+    Classify a single vehicle_pass into a mutually exclusive presence
+    event_type: "known" takes priority, then "lingering", else "pass_by".
+    """
+
+    vehicle_pass = vehicle_pass or {}
+    known_vehicle = vehicle_pass.get("known_vehicle")
+    duration_seconds = vehicle_pass.get("duration_seconds") or 0
+
+    if known_vehicle:
+        return "known"
+
+    if duration_seconds >= 300:
+        return "lingering"
+
+    return "pass_by"
+
+
 def summarize_presence(vehicle_passes, now=None):
     """
     Derive a rolling 24-hour presence/traffic summary from vehicle_passes.
@@ -203,12 +222,7 @@ def summarize_presence(vehicle_passes, now=None):
         if sensor_count is None:
             sensor_count = len(sensor_ids)
 
-        if known_vehicle:
-            event_type = "known"
-        elif duration_seconds >= 300:
-            event_type = "lingering"
-        else:
-            event_type = "pass_by"
+        event_type = classify_presence_event(vehicle_pass)
 
         recent_events.append({
             "start": vehicle_pass["start"].isoformat(),
@@ -230,6 +244,93 @@ def summarize_presence(vehicle_passes, now=None):
         "busiest_hour": busiest_hour,
         "busiest_hour_count": busiest_hour_count,
         "recent_events": recent_events,
+    }
+
+
+def build_presence_timeline(vehicle_passes, now=None):
+    """
+    Build a fixed-size, trailing 24-hour hourly bucket summary from
+    vehicle_passes, for a static Presence Timeline view.
+
+    Pure and read-only: same input shape and windowing behavior as
+    summarize_presence(). Always returns exactly 24 buckets, oldest to
+    newest, regardless of how many passes fall in the window.
+    """
+
+    valid_passes = []
+
+    for vehicle_pass in vehicle_passes or []:
+        start = vehicle_pass.get("start") if vehicle_pass else None
+
+        if not start:
+            continue
+
+        if start.tzinfo is None:
+            start = start.replace(tzinfo=timezone.utc)
+
+        end = vehicle_pass.get("end") or start
+
+        if end.tzinfo is None:
+            end = end.replace(tzinfo=timezone.utc)
+
+        valid_passes.append({**vehicle_pass, "start": start, "end": end})
+
+    if now is None:
+        latest = None
+
+        for vehicle_pass in valid_passes:
+            candidate = max(vehicle_pass["start"], vehicle_pass["end"])
+            if latest is None or candidate > latest:
+                latest = candidate
+
+        now = latest or datetime.now(timezone.utc)
+    elif now.tzinfo is None:
+        now = now.replace(tzinfo=timezone.utc)
+
+    window_start = now - timedelta(hours=24)
+
+    buckets = []
+    buckets_by_hour = {}
+
+    for offset in range(24):
+        slot_start = window_start + timedelta(hours=offset)
+        hour_label = slot_start.astimezone().strftime("%H:00")
+
+        bucket = {
+            "hour": hour_label,
+            "known": 0,
+            "lingering": 0,
+            "pass_by": 0,
+            "total": 0,
+        }
+
+        buckets.append(bucket)
+        buckets_by_hour.setdefault(hour_label, bucket)
+
+    for vehicle_pass in valid_passes:
+        start = vehicle_pass["start"]
+
+        if not (window_start <= start <= now):
+            continue
+
+        hour_label = start.astimezone().strftime("%H:00")
+        bucket = buckets_by_hour.get(hour_label)
+
+        if bucket is None:
+            continue
+
+        event_type = classify_presence_event(vehicle_pass)
+
+        if event_type not in ("known", "lingering", "pass_by"):
+            event_type = "pass_by"
+
+        bucket[event_type] += 1
+        bucket["total"] += 1
+
+    return {
+        "window_start": window_start.isoformat(),
+        "window_end": now.isoformat(),
+        "buckets": buckets,
     }
 
 

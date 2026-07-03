@@ -276,6 +276,7 @@ def write_report(context):
     ingest_stats = context["ingest_stats"]
     prune_stats = context.get("prune_stats", {})
     presence_summary = context.get("presence_summary", {})
+    presence_timeline = context.get("presence_timeline", {})
 
     sensor_model_map = defaultdict(set)
     sensor_protocol_map = defaultdict(set)
@@ -381,6 +382,7 @@ def write_report(context):
         ingest_stats=ingest_stats,
     )
     html += presence_summary_section(presence_summary)
+    html += presence_timeline_section(presence_timeline)
     html += known_vehicle_section(known_vehicle_summaries)
 
     if ignored_vehicles:
@@ -675,6 +677,93 @@ def presence_summary_section(presence_summary):
     html += """
         </tbody>
       </table>
+    </div>
+"""
+
+    return html
+
+
+def presence_timeline_section(presence_timeline):
+    if not isinstance(presence_timeline, dict):
+        presence_timeline = {}
+
+    buckets = presence_timeline.get("buckets")
+
+    html = """
+    <div class="section">
+      <h2>Presence Timeline</h2>
+      <p class="muted">Last 24 hours of known vehicles, lingering events, and pass-by traffic.</p>
+"""
+
+    if not isinstance(buckets, list) or not buckets:
+        html += """
+      <p class="muted">Not enough presence data yet.</p>
+    </div>
+"""
+        return html
+
+    def bucket_int(bucket, key):
+        value = bucket.get(key) if isinstance(bucket, dict) else None
+
+        if value is None:
+            return 0
+
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            return 0
+
+    max_total = 0
+
+    for bucket in buckets:
+        total = bucket_int(bucket, "total")
+        if total > max_total:
+            max_total = total
+
+    if max_total < 1:
+        max_total = 1
+
+    html += """
+      <div class="presence-timeline-legend">
+        <span class="presence-timeline-legend-item presence-timeline-known">Known</span>
+        <span class="presence-timeline-legend-item presence-timeline-lingering">Lingering</span>
+        <span class="presence-timeline-legend-item presence-timeline-pass-by">Pass-by</span>
+      </div>
+      <div class="presence-timeline">
+"""
+
+    for bucket in buckets:
+        hour_label = bucket.get("hour") if isinstance(bucket, dict) else None
+        hour_label = hour_label or "—"
+
+        known = bucket_int(bucket, "known")
+        lingering = bucket_int(bucket, "lingering")
+        pass_by = bucket_int(bucket, "pass_by")
+        total = bucket_int(bucket, "total")
+
+        total_height_pct = (total / max_total) * 100
+        known_pct = (known / max_total) * 100
+        lingering_pct = (lingering / max_total) * 100
+        pass_by_pct = (pass_by / max_total) * 100
+
+        title_text = (
+            f"{hour_label} — total {total}, known {known}, "
+            f"lingering {lingering}, pass-by {pass_by}"
+        )
+
+        html += f"""
+        <div class="presence-timeline-bucket" title="{safe_text(title_text)}">
+          <div class="presence-timeline-bar" style="height: {total_height_pct:.2f}%">
+            <div class="presence-timeline-segment presence-timeline-known" style="height: {known_pct:.2f}%"></div>
+            <div class="presence-timeline-segment presence-timeline-lingering" style="height: {lingering_pct:.2f}%"></div>
+            <div class="presence-timeline-segment presence-timeline-pass-by" style="height: {pass_by_pct:.2f}%"></div>
+          </div>
+          <div class="presence-timeline-hour-label">{safe_text(hour_label)}</div>
+        </div>
+"""
+
+    html += """
+      </div>
     </div>
 """
 
