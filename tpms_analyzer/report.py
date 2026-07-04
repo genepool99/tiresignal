@@ -177,7 +177,7 @@ def pattern_label_class(label_text):
         "Went quiet": "pattern-quiet",
         "Occasional visitor": "pattern-occasional",
         "Mixed sensor types": "pattern-mixed",
-        "Poss. Stalker": "pattern-stalker",
+        "Possible  Stalker": "pattern-stalker",
         "Weekend Warrior": "pattern-weekend",
         "Commuter": "pattern-commuter",
     }
@@ -206,7 +206,7 @@ PATTERN_LABEL_DESCRIPTIONS = {
     "Maybe a fluke": "Only a few repeated passes so far. Could be a coincidence.",
     "Went quiet": "Not seen recently relative to this report.",
     "Occasional visitor": "Seen over an extended period, but not very often.",
-    "Poss. Stalker": "Repeated unknown signal seen across multiple days and still recently active.",
+    "Possible  Stalker": "Repeated unknown signal seen across multiple days and still recently active.",
     "Weekend Warrior": "Unknown signal appears mostly on weekends.",
     "Commuter": "Unknown signal appears mostly on weekdays.",
 }
@@ -349,7 +349,7 @@ def write_report(context):
         data-tab-target="tab-charts"
         onclick="showReportTab('tab-charts')"
       >
-        Charts
+        Analytics
       </button>
       <button
         type="button"
@@ -366,6 +366,14 @@ def write_report(context):
         onclick="showReportTab('tab-raw-packets')"
       >
         Raw Packets
+      </button>
+      <button
+        type="button"
+        class="tab-button"
+        data-tab-target="tab-diagnostics"
+        onclick="showReportTab('tab-diagnostics')"
+      >
+        Diagnostics
       </button>
     </div>
 
@@ -405,6 +413,7 @@ def write_report(context):
     <div id="tab-charts" class="tab-panel">
 """
     html += charts_section()
+    html += decoded_fields_section(context.get("decoded_field_summary"))
 
     html += """
     </div>
@@ -420,7 +429,6 @@ def write_report(context):
     html += recent_passes_section(recent_pass_rows)
     html += sensor_section(sensor_display_rows)
     html += recent_events_section(recent_event_rows)
-    html += import_stats_section(ingest_stats, prune_stats)
 
     html += """
     </div>
@@ -428,6 +436,19 @@ def write_report(context):
     <div id="tab-raw-packets" class="tab-panel">
 """
     html += raw_packets_section(raw_packet_lines)
+
+    html += """
+    </div>
+
+    <div id="tab-diagnostics" class="tab-panel">
+"""
+    html += diagnostics_summary_section(
+        generated_at=generated_at,
+        events=events,
+        sensor_summaries=sensor_summaries,
+        raw_packet_lines=raw_packet_lines,
+    )
+    html += import_stats_section(ingest_stats, prune_stats)
 
     html += """
     </div>
@@ -447,18 +468,21 @@ def html_start(generated_at):
   <link rel="apple-touch-icon" sizes="180x180" href="tiresignal-favicon-180.png">
   <style>{CSS_BLOCK}
 .brand-title {{ margin: 0; line-height: 1; }}
-.brand-logo {{ height: 90px; width: auto; display: block; }}
+.brand-logo {{ height: 64px; width: auto; display: block; }}
 @media (max-width: 480px) {{ .brand-logo {{ height: 36px; }} }}
 .brand-logo-button {{ display: block; background: none; border: none; padding: 0; margin: 0; cursor: pointer; border-radius: 10px; }}
 .brand-logo-button:focus-visible {{ outline: 3px solid rgba(37, 99, 235, 0.35); outline-offset: 3px; }}
-.header-meta {{ display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }}
-.header-chip {{ display: inline-flex; align-items: baseline; gap: 5px; font-size: 12px; line-height: 1.4; font-weight: 600; padding: 4px 9px; border-radius: 999px; background: #ffffff; color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow-sm); white-space: nowrap; }}
-.header-chip-label {{ color: var(--muted); font-weight: 700; }}
-.header-chip code {{ font-size: 12px; color: var(--text); background: transparent; padding: 0; }}
-.header-github-link {{ display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: #ffffff; color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow-sm); text-decoration: none; flex-shrink: 0; }}
+.header-brand-group {{ display: flex; align-items: center; gap: 12px; flex-wrap: wrap; min-width: 0; flex-shrink: 0; }}
+.header-meta {{ display: flex; flex-direction: column; align-items: flex-end; gap: 4px; margin-top: 0; min-width: 0; text-align: right; }}
+.header-meta-line {{ display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 13px; line-height: 1.4; font-weight: 700; color: var(--text); }}
+.header-meta-separator {{ color: var(--muted); font-weight: 700; }}
+.header-source {{ max-width: min(720px, 100%); width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 11px; line-height: 1.4; color: var(--muted); }}
+.header-source code {{ font-size: 11px; color: var(--muted); background: transparent; padding: 0; }}
+.header-github-link {{ display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 999px; background: #ffffff; color: var(--text); border: 1px solid var(--border); box-shadow: var(--shadow-sm); text-decoration: none; flex-shrink: 0; transform: translateY(4px); }}
 .header-github-link:hover {{ background: var(--soft); border-color: var(--muted); }}
 .header-github-link:focus-visible {{ outline: 3px solid rgba(37, 99, 235, 0.35); outline-offset: 3px; }}
 .header-github-link svg {{ display: block; }}
+.header-actions {{ display: flex; align-items: center; justify-content: flex-end; gap: 12px; flex-wrap: wrap; margin-left: auto; min-width: 0; }}
   </style>
 </head>
 <body>
@@ -473,26 +497,33 @@ def html_start(generated_at):
   </div>
   <header>
     <div class="header-row">
-      <div>
+      <div class="header-brand-group">
         <h1 class="brand-title">
           <button type="button" class="brand-logo-button" onclick="showReportTab('tab-overview')" aria-label="Go to Overview tab">
             <img class="brand-logo" src="tiresignal-report-logo.png" alt="TireSignal">
           </button>
         </h1>
-        <div class="header-meta">
-          <span class="header-chip"><span class="header-chip-label">Generated</span>{safe_text(generated_at)}</span>
-          <span class="header-chip"><span class="header-chip-label">Version</span>v{safe_text(APP_VERSION)}</span>
-          <span class="header-chip" title="{safe_text(LOG_PATH)}"><span class="header-chip-label">Source</span><code>{safe_text(LOG_PATH)}</code></span>
-          <a class="header-github-link" href="https://github.com/genepool99/tiresignal" target="_blank" rel="noopener noreferrer" title="View on GitHub" aria-label="View TireSignal on GitHub">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 4.58c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
-            </svg>
-          </a>
-        </div>
+        <a class="header-github-link" href="https://github.com/genepool99/tiresignal" target="_blank" rel="noopener noreferrer" title="View on GitHub" aria-label="View TireSignal on GitHub">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+            <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82A7.65 7.65 0 0 1 8 4.58c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/>
+          </svg>
+        </a>
       </div>
-      <button id="refreshButton" class="refresh-button" onclick="refreshReport()">
-        Refresh Report
-      </button>
+      <div class="header-actions">
+        <div class="header-meta">
+          <div class="header-meta-line">
+            <span>Generated {safe_text(generated_at)}</span>
+            <span class="header-meta-separator" aria-hidden="true">&middot;</span>
+            <span>Version v{safe_text(APP_VERSION)}</span>
+          </div>
+          <div class="header-source" title="{safe_text(LOG_PATH)}">
+            Source: <code>{safe_text(LOG_PATH)}</code>
+          </div>
+        </div>
+        <button id="refreshButton" class="refresh-button" onclick="refreshReport()">
+          Refresh Report
+        </button>
+      </div>
     </div>
   </header>
 
@@ -578,10 +609,9 @@ def presence_summary_section(presence_summary):
     unknown_24h = presence_summary.get("unknown_24h") or 0
     lingering_24h = presence_summary.get("lingering_24h") or 0
     busiest_hour = presence_summary.get("busiest_hour")
-    busiest_hour_count = presence_summary.get("busiest_hour_count") or 0
 
     if busiest_hour:
-        busiest_hour_text = f"{busiest_hour} ({busiest_hour_count} sightings)"
+        busiest_hour_text = f"{busiest_hour}"
     else:
         busiest_hour_text = "—"
 
@@ -1111,14 +1141,14 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, s
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Strong', 'info')">Strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Possible', 'info')">Possible</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'High-Confidence Unknown', '')">High-Confidence Unknown</button>
-        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Poss. Stalker', '')">Poss. Stalker</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Possible  Stalker', '')">Possible  Stalker</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Commuter', '')">Commuter</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('newUnknownTable', 'newUnknownSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
         <button type="button" class="inline-info-button"
           onclick="openInfoModal(this)"
           data-info-title="About the signal filters"
-          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Poss. Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
+          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Possible  Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
         >Signal filters explained</button>
         </div>
       </div>
@@ -1240,14 +1270,14 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Strong', 'confidence')">Strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Possible', 'confidence')">Possible</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'High-Confidence Unknown', '')">High-Confidence Unknown</button>
-        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Poss. Stalker', '')">Poss. Stalker</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Possible  Stalker', '')">Possible  Stalker</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Commuter', '')">Commuter</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('overlapCandidateTable', 'overlapCandidateSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
         <button type="button" class="inline-info-button"
           onclick="openInfoModal(this)"
           data-info-title="About the signal filters"
-          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Poss. Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
+          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Possible  Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
         >Signal filters explained</button>
         </div>
       </div>
@@ -1405,14 +1435,14 @@ def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=No
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Strong', 'info')">Strong</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Possible', 'info')">Possible</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'High-Confidence Unknown', '')">High-Confidence Unknown</button>
-        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Poss. Stalker', '')">Poss. Stalker</button>
+        <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Possible  Stalker', '')">Possible  Stalker</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Weekend Warrior', '')">Weekend Warrior</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Commuter', '')">Commuter</button>
         <button type="button" class="filter-btn" onclick="quickFilterExactPillTable('exactCandidateTable', 'exactCandidateSearchInput', 'Signal Lurker', '')">Signal Lurker</button>
         <button type="button" class="inline-info-button"
           onclick="openInfoModal(this)"
           data-info-title="About the signal filters"
-          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Poss. Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
+          data-info-body="&lt;p class=&quot;muted&quot;&gt;These quick filters match the tags shown on each row.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Very strong / Strong / Possible&lt;/strong&gt; — confidence tiers based on how many sensors are in the group and how many times it repeated.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;High-Confidence Unknown&lt;/strong&gt; — unknown group has a strong repeat pattern and may be worth mapping.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Possible  Stalker&lt;/strong&gt; — repeated unknown signal seen across multiple days and still recently active.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Weekend Warrior&lt;/strong&gt; — unknown signal appears mostly on weekends.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Commuter&lt;/strong&gt; — unknown signal appears mostly on weekdays.&lt;/p&gt;&lt;p class=&quot;muted&quot;&gt;&lt;strong&gt;Signal Lurker&lt;/strong&gt; — mid-strength or weak unknown that has repeated but not enough to call regular.&lt;/p&gt;"
         >Signal filters explained</button>
         </div>
       </div>
@@ -1610,9 +1640,68 @@ def charts_section():
 """
 
 
+def decoded_fields_section(summary):
+    if not summary or not summary.get("fields"):
+        return ""
+
+    total_events = summary.get("total_events", 0)
+
+    html = """
+    <section class="section">
+      <h2>Decoded TPMS Fields</h2>
+      <p class="muted">Presence and observed values for optional decoded rtl_433 fields across all loaded events. Values are shown as-is, with no interpretation.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Present</th>
+            <th>Missing</th>
+            <th>Top values</th>
+          </tr>
+        </thead>
+        <tbody>
+"""
+
+    for field in summary["fields"]:
+        name = field.get("name", "")
+        present_count = field.get("present_count", 0)
+        missing_count = field.get("missing_count", 0)
+        values = field.get("values") or []
+
+        if total_events > 0:
+            percent = (present_count / total_events) * 100
+            present_text = f"{present_count} / {total_events} ({percent:.1f}%)"
+        else:
+            present_text = f"{present_count} / {total_events}"
+
+        if values:
+            values_html = "".join(
+                pill(f"{value.get('value', '')} × {value.get('count', 0)}", "info")
+                for value in values
+            )
+        else:
+            values_html = '<span class="muted">—</span>'
+
+        html += f"""
+          <tr>
+            <td>{safe_text(name)}</td>
+            <td>{safe_text(present_text)}</td>
+            <td>{safe_text(missing_count)}</td>
+            <td>{values_html}</td>
+          </tr>
+"""
+
+    html += """
+        </tbody>
+      </table>
+    </section>
+"""
+    return html
+
+
 def recent_passes_section(rows):
     html = f"""
-    <details class="section" open>
+    <details class="section">
       <summary class="section-summary">
         <span class="section-summary-main">
           <span class="section-summary-title">Recent Passes</span>
@@ -1768,14 +1857,25 @@ def recent_events_section(rows):
             <th>Temp C</th>
             <th>RSSI</th>
             <th>SNR</th>
+            <th>Decoded</th>
           </tr>
         </thead>
         <tbody>
 """
 
+    decoded_field_names = ["moving", "flags", "state", "status", "learn", "mic"]
+
     for event in rows:
         pressure = event["pressure_psi"] if event["pressure_psi"] is not None else event["pressure_kpa"]
         event_time = display_dt(event["event_time"]) if event["event_time"] else safe_text(event["event_time_text"])
+
+        raw = event.get("raw") if isinstance(event.get("raw"), dict) else {}
+        decoded_pills = [
+            pill(f"{name}={raw[name]}", "info")
+            for name in decoded_field_names
+            if raw.get(name) is not None and raw.get(name) != ""
+        ]
+        decoded_html = "".join(decoded_pills) if decoded_pills else '<span class="muted">—</span>'
 
         html += f"""
           <tr>
@@ -1786,6 +1886,7 @@ def recent_events_section(rows):
             <td>{safe_text(event["temperature_c"] if event["temperature_c"] is not None else "")}</td>
             <td>{safe_text(event["rssi"] if event["rssi"] is not None else "")}</td>
             <td>{safe_text(event["snr"] if event["snr"] is not None else "")}</td>
+            <td>{decoded_html}</td>
           </tr>
 """
 
@@ -1856,6 +1957,70 @@ def raw_packets_section(lines):
     </div>
 """
     return html
+
+
+def diagnostics_summary_section(generated_at, events, sensor_summaries, raw_packet_lines):
+    def format_file_size(path):
+        if not path.exists():
+            return "—"
+
+        size = path.stat().st_size
+
+        for unit in ["B", "KB", "MB", "GB"]:
+            if size < 1024:
+                return f"{size:.0f} {unit}" if unit == "B" else f"{size:.1f} {unit}"
+            size /= 1024
+
+        return f"{size:.1f} TB"
+
+    def format_file_mtime(path):
+        if not path.exists():
+            return "—"
+
+        mtime = datetime.fromtimestamp(path.stat().st_mtime).astimezone()
+        return display_dt(mtime)
+
+    event_times = [e["event_time"] for e in events if e.get("event_time") is not None]
+    oldest_event_time = display_dt(min(event_times)) if event_times else "—"
+    newest_event_time = display_dt(max(event_times)) if event_times else "—"
+
+    events_with_pressure = sum(
+        1 for e in events if e.get("pressure_psi") is not None or e.get("pressure_kpa") is not None
+    )
+    events_with_temperature = sum(1 for e in events if e.get("temperature_c") is not None)
+    events_with_rssi = sum(1 for e in events if e.get("rssi") is not None)
+    events_with_snr = sum(1 for e in events if e.get("snr") is not None)
+    events_with_noise = sum(1 for e in events if e.get("noise") is not None)
+    events_with_raw = sum(1 for e in events if isinstance(e.get("raw"), dict) and e.get("raw"))
+
+    return f"""
+    <div class="section">
+      <h2>Report &amp; Database Health</h2>
+      <p class="muted">Operational visibility into report generation and stored data. No interpretation or thresholds are applied.</p>
+      <table>
+        <tbody>
+          <tr><th>Report generated at</th><td>{safe_text(generated_at)}</td></tr>
+          <tr><th>App version</th><td>{safe_text(APP_VERSION)}</td></tr>
+          <tr><th>Source log path</th><td><code>{safe_text(LOG_PATH)}</code></td></tr>
+          <tr><th>Database path</th><td><code>{safe_text(DB_PATH)}</code></td></tr>
+          <tr><th>Database file size</th><td>{safe_text(format_file_size(DB_PATH))}</td></tr>
+          <tr><th>Vehicle map path</th><td><code>{safe_text(VEHICLE_MAP_PATH)}</code></td></tr>
+          <tr><th>Vehicle map modified</th><td>{safe_text(format_file_mtime(VEHICLE_MAP_PATH))}</td></tr>
+          <tr><th>Total events loaded</th><td>{len(events)}</td></tr>
+          <tr><th>Unique sensor IDs</th><td>{len(sensor_summaries)}</td></tr>
+          <tr><th>Oldest event time</th><td>{oldest_event_time}</td></tr>
+          <tr><th>Newest event time</th><td>{newest_event_time}</td></tr>
+          <tr><th>Events with pressure</th><td>{events_with_pressure}</td></tr>
+          <tr><th>Events with temperature</th><td>{events_with_temperature}</td></tr>
+          <tr><th>Events with RSSI</th><td>{events_with_rssi}</td></tr>
+          <tr><th>Events with SNR</th><td>{events_with_snr}</td></tr>
+          <tr><th>Events with noise</th><td>{events_with_noise}</td></tr>
+          <tr><th>Events with raw decoded data</th><td>{events_with_raw}</td></tr>
+          <tr><th>Recent raw packet tail lines</th><td>{len(raw_packet_lines)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+"""
 
 
 def import_stats_section(stats, prune_stats):

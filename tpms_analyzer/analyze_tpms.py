@@ -13,6 +13,7 @@ from analysis import (
     hourly_counts,
     recent_events,
     recent_passes,
+    summarize_decoded_fields,
     summarize_exact_candidates,
     summarize_known_vehicles,
     summarize_overlap_candidates,
@@ -96,6 +97,7 @@ def main():
         "traffic_heatmap": traffic_heatmap,
         "daily_counts": daily_counts(events),
         "hourly_counts": hourly_counts(events),
+        "decoded_field_summary": summarize_decoded_fields(events),
         "ingest_stats": ingest_stats,
         "prune_stats": prune_stats,
     }

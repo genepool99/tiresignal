@@ -634,3 +634,46 @@ def recent_events(events):
 
 def recent_passes(vehicle_passes):
     return vehicle_passes[:MAX_RECENT_PASSES]
+
+
+DECODED_FIELD_NAMES = ["moving", "flags", "state", "status", "learn", "mic"]
+DECODED_FIELD_TOP_VALUES = 8
+
+
+def summarize_decoded_fields(events):
+    field_present_counts = {name: 0 for name in DECODED_FIELD_NAMES}
+    field_value_counts = {name: Counter() for name in DECODED_FIELD_NAMES}
+    total_events = 0
+
+    for event in events:
+        total_events += 1
+        raw = event.get("raw") if isinstance(event.get("raw"), dict) else {}
+
+        for name in DECODED_FIELD_NAMES:
+            if name not in raw:
+                continue
+            value = raw[name]
+            if value is None or value == "":
+                continue
+            field_present_counts[name] += 1
+            field_value_counts[name][str(value)] += 1
+
+    fields = []
+    for name in DECODED_FIELD_NAMES:
+        present_count = field_present_counts[name]
+        values = sorted(
+            field_value_counts[name].items(),
+            key=lambda item: (-item[1], item[0]),
+        )[:DECODED_FIELD_TOP_VALUES]
+
+        fields.append({
+            "name": name,
+            "present_count": present_count,
+            "missing_count": total_events - present_count,
+            "values": [{"value": value, "count": count} for value, count in values],
+        })
+
+    return {
+        "total_events": total_events,
+        "fields": fields,
+    }
