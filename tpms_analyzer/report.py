@@ -349,7 +349,7 @@ def write_report(context):
         data-tab-target="tab-charts"
         onclick="showReportTab('tab-charts')"
       >
-        Charts
+        Analytics
       </button>
       <button
         type="button"
@@ -405,6 +405,7 @@ def write_report(context):
     <div id="tab-charts" class="tab-panel">
 """
     html += charts_section()
+    html += decoded_fields_section(context.get("decoded_field_summary"))
 
     html += """
     </div>
@@ -1617,6 +1618,65 @@ def charts_section():
       <div id="signalChart" class="chart"></div>
     </div>
 """
+
+
+def decoded_fields_section(summary):
+    if not summary or not summary.get("fields"):
+        return ""
+
+    total_events = summary.get("total_events", 0)
+
+    html = """
+    <section class="section">
+      <h2>Decoded TPMS Fields</h2>
+      <p class="muted">Presence and observed values for optional decoded rtl_433 fields across all loaded events. Values are shown as-is, with no interpretation.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Present</th>
+            <th>Missing</th>
+            <th>Top values</th>
+          </tr>
+        </thead>
+        <tbody>
+"""
+
+    for field in summary["fields"]:
+        name = field.get("name", "")
+        present_count = field.get("present_count", 0)
+        missing_count = field.get("missing_count", 0)
+        values = field.get("values") or []
+
+        if total_events > 0:
+            percent = (present_count / total_events) * 100
+            present_text = f"{present_count} / {total_events} ({percent:.1f}%)"
+        else:
+            present_text = f"{present_count} / {total_events}"
+
+        if values:
+            values_html = "".join(
+                pill(f"{value.get('value', '')} × {value.get('count', 0)}", "info")
+                for value in values
+            )
+        else:
+            values_html = '<span class="muted">—</span>'
+
+        html += f"""
+          <tr>
+            <td>{safe_text(name)}</td>
+            <td>{safe_text(present_text)}</td>
+            <td>{safe_text(missing_count)}</td>
+            <td>{values_html}</td>
+          </tr>
+"""
+
+    html += """
+        </tbody>
+      </table>
+    </section>
+"""
+    return html
 
 
 def recent_passes_section(rows):
