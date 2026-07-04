@@ -367,6 +367,14 @@ def write_report(context):
       >
         Raw Packets
       </button>
+      <button
+        type="button"
+        class="tab-button"
+        data-tab-target="tab-diagnostics"
+        onclick="showReportTab('tab-diagnostics')"
+      >
+        Diagnostics
+      </button>
     </div>
 
     <div id="tab-overview" class="tab-panel active">
@@ -421,7 +429,6 @@ def write_report(context):
     html += recent_passes_section(recent_pass_rows)
     html += sensor_section(sensor_display_rows)
     html += recent_events_section(recent_event_rows)
-    html += import_stats_section(ingest_stats, prune_stats)
 
     html += """
     </div>
@@ -429,6 +436,13 @@ def write_report(context):
     <div id="tab-raw-packets" class="tab-panel">
 """
     html += raw_packets_section(raw_packet_lines)
+
+    html += """
+    </div>
+
+    <div id="tab-diagnostics" class="tab-panel">
+"""
+    html += import_stats_section(ingest_stats, prune_stats)
 
     html += """
     </div>
