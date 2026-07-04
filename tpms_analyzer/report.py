@@ -1681,7 +1681,7 @@ def decoded_fields_section(summary):
 
 def recent_passes_section(rows):
     html = f"""
-    <details class="section" open>
+    <details class="section">
       <summary class="section-summary">
         <span class="section-summary-main">
           <span class="section-summary-title">Recent Passes</span>
