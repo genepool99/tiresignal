@@ -442,6 +442,12 @@ def write_report(context):
 
     <div id="tab-diagnostics" class="tab-panel">
 """
+    html += diagnostics_summary_section(
+        generated_at=generated_at,
+        events=events,
+        sensor_summaries=sensor_summaries,
+        raw_packet_lines=raw_packet_lines,
+    )
     html += import_stats_section(ingest_stats, prune_stats)
 
     html += """
@@ -1951,6 +1957,70 @@ def raw_packets_section(lines):
     </div>
 """
     return html
+
+
+def diagnostics_summary_section(generated_at, events, sensor_summaries, raw_packet_lines):
+    def format_file_size(path):
+        if not path.exists():
+            return "—"
+
+        size = path.stat().st_size
+
+        for unit in ["B", "KB", "MB", "GB"]:
+            if size < 1024:
+                return f"{size:.0f} {unit}" if unit == "B" else f"{size:.1f} {unit}"
+            size /= 1024
+
+        return f"{size:.1f} TB"
+
+    def format_file_mtime(path):
+        if not path.exists():
+            return "—"
+
+        mtime = datetime.fromtimestamp(path.stat().st_mtime).astimezone()
+        return display_dt(mtime)
+
+    event_times = [e["event_time"] for e in events if e.get("event_time") is not None]
+    oldest_event_time = display_dt(min(event_times)) if event_times else "—"
+    newest_event_time = display_dt(max(event_times)) if event_times else "—"
+
+    events_with_pressure = sum(
+        1 for e in events if e.get("pressure_psi") is not None or e.get("pressure_kpa") is not None
+    )
+    events_with_temperature = sum(1 for e in events if e.get("temperature_c") is not None)
+    events_with_rssi = sum(1 for e in events if e.get("rssi") is not None)
+    events_with_snr = sum(1 for e in events if e.get("snr") is not None)
+    events_with_noise = sum(1 for e in events if e.get("noise") is not None)
+    events_with_raw = sum(1 for e in events if isinstance(e.get("raw"), dict) and e.get("raw"))
+
+    return f"""
+    <div class="section">
+      <h2>Report &amp; Database Health</h2>
+      <p class="muted">Operational visibility into report generation and stored data. No interpretation or thresholds are applied.</p>
+      <table>
+        <tbody>
+          <tr><th>Report generated at</th><td>{safe_text(generated_at)}</td></tr>
+          <tr><th>App version</th><td>{safe_text(APP_VERSION)}</td></tr>
+          <tr><th>Source log path</th><td><code>{safe_text(LOG_PATH)}</code></td></tr>
+          <tr><th>Database path</th><td><code>{safe_text(DB_PATH)}</code></td></tr>
+          <tr><th>Database file size</th><td>{safe_text(format_file_size(DB_PATH))}</td></tr>
+          <tr><th>Vehicle map path</th><td><code>{safe_text(VEHICLE_MAP_PATH)}</code></td></tr>
+          <tr><th>Vehicle map modified</th><td>{safe_text(format_file_mtime(VEHICLE_MAP_PATH))}</td></tr>
+          <tr><th>Total events loaded</th><td>{len(events)}</td></tr>
+          <tr><th>Unique sensor IDs</th><td>{len(sensor_summaries)}</td></tr>
+          <tr><th>Oldest event time</th><td>{oldest_event_time}</td></tr>
+          <tr><th>Newest event time</th><td>{newest_event_time}</td></tr>
+          <tr><th>Events with pressure</th><td>{events_with_pressure}</td></tr>
+          <tr><th>Events with temperature</th><td>{events_with_temperature}</td></tr>
+          <tr><th>Events with RSSI</th><td>{events_with_rssi}</td></tr>
+          <tr><th>Events with SNR</th><td>{events_with_snr}</td></tr>
+          <tr><th>Events with noise</th><td>{events_with_noise}</td></tr>
+          <tr><th>Events with raw decoded data</th><td>{events_with_raw}</td></tr>
+          <tr><th>Recent raw packet tail lines</th><td>{len(raw_packet_lines)}</td></tr>
+        </tbody>
+      </table>
+    </div>
+"""
 
 
 def import_stats_section(stats, prune_stats):
