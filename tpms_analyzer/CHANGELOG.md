@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.3.18
+
+### Added
+
+- Added a Diagnostics tab with Import / Pruning Stats and a new Report & Database Health summary.
+- Added decoded TPMS field analytics to the Analytics tab, summarizing presence and top observed values for moving, flags, state, status, learn, and mic across all loaded events.
+- Added decoded field pills for moving, flags, state, status, learn, and mic to Recent Events.
+
+### Changed
+
+- Renamed the Charts tab to Analytics to reflect its expanded scope.
+- Moved Import / Pruning Stats out of the Details tab into the new Diagnostics tab.
+- Collapsed all expandable sections on the Details tab by default, including Recent Passes.
+- Improved the report header layout for better responsiveness on narrow screens.
+
 ## 0.3.17
 
 ### Added
