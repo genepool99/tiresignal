@@ -279,7 +279,8 @@ def load_events(conn):
             maybe_battery,
             rssi,
             snr,
-            noise
+            noise,
+            raw_json
         FROM tpms_events
         ORDER BY event_time ASC
     """).fetchall()
@@ -288,6 +289,13 @@ def load_events(conn):
 
     for row in rows:
         event_time = parse_time(row["event_time"])
+
+        try:
+            raw_packet = json.loads(row["raw_json"])
+        except (json.JSONDecodeError, TypeError):
+            raw_packet = {}
+        if not isinstance(raw_packet, dict):
+            raw_packet = {}
 
         events.append({
             "event_time": event_time,
@@ -303,6 +311,7 @@ def load_events(conn):
             "rssi": row["rssi"],
             "snr": row["snr"],
             "noise": row["noise"],
+            "raw": raw_packet,
         })
 
     return events

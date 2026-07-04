@@ -1777,14 +1777,25 @@ def recent_events_section(rows):
             <th>Temp C</th>
             <th>RSSI</th>
             <th>SNR</th>
+            <th>Decoded</th>
           </tr>
         </thead>
         <tbody>
 """
 
+    decoded_field_names = ["moving", "flags", "state", "status", "learn", "mic"]
+
     for event in rows:
         pressure = event["pressure_psi"] if event["pressure_psi"] is not None else event["pressure_kpa"]
         event_time = display_dt(event["event_time"]) if event["event_time"] else safe_text(event["event_time_text"])
+
+        raw = event.get("raw") if isinstance(event.get("raw"), dict) else {}
+        decoded_pills = [
+            pill(f"{name}={raw[name]}", "info")
+            for name in decoded_field_names
+            if raw.get(name) is not None and raw.get(name) != ""
+        ]
+        decoded_html = "".join(decoded_pills) if decoded_pills else '<span class="muted">—</span>'
 
         html += f"""
           <tr>
@@ -1795,6 +1806,7 @@ def recent_events_section(rows):
             <td>{safe_text(event["temperature_c"] if event["temperature_c"] is not None else "")}</td>
             <td>{safe_text(event["rssi"] if event["rssi"] is not None else "")}</td>
             <td>{safe_text(event["snr"] if event["snr"] is not None else "")}</td>
+            <td>{decoded_html}</td>
           </tr>
 """
 
