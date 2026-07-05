@@ -605,6 +605,9 @@ JS_BLOCK = """    function getServiceBaseUrl() {
         });
         decodedFlagsHtml += `</div>`;
         decodedFlagsHtml += `<div class="chart-inline-note drawer-note-hint">Raw rtl_433 decoder-specific values. Do not compare across different models/protocols.</div>`;
+        if (models.length > 1 || protocols.length > 1) {
+          decodedFlagsHtml += `<div class="chart-inline-note drawer-note-hint">Multiple model/protocol values observed for these sensors. Treat flags as mixed decoder-specific raw values.</div>`;
+        }
         decodedFlagsHtml += `</div>`;
       }
 
