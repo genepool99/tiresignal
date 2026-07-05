@@ -515,7 +515,7 @@ def html_start(generated_at):
           <div class="header-meta-line">
             <span>Generated {safe_text(generated_at)}</span>
             <span class="header-meta-separator" aria-hidden="true">&middot;</span>
-            <span>Version v{safe_text(APP_VERSION)}</span>
+            <span>Version {safe_text(APP_VERSION)}</span>
           </div>
           <div class="header-source" title="{safe_text(LOG_PATH)}">
             Source: <code>{safe_text(LOG_PATH)}</code>
