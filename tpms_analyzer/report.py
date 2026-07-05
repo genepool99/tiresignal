@@ -1694,9 +1694,97 @@ def decoded_fields_section(summary):
     html += """
         </tbody>
       </table>
+"""
+
+    html += _decoded_fields_group_table(summary.get("groups", []))
+
+    html += """
     </section>
 """
     return html
+
+
+DECODED_FIELD_NOTES = {
+    "flags": "Raw decoder-specific value",
+    "state": "Raw decoder-specific value",
+    "status": "Raw decoder-specific value",
+    "moving": "Boolean-like value",
+    "learn": "Boolean-like value",
+    "mic": "Integrity field",
+}
+
+DECODER_SPECIFIC_FIELDS = {"flags", "state", "status"}
+
+
+def _decoded_fields_group_table(groups):
+    if not groups:
+        return ""
+
+    rows_html = ""
+    for group in groups:
+        fields = [
+            field for field in (group.get("fields") or [])
+            if field.get("name") in DECODER_SPECIFIC_FIELDS and field.get("present_count", 0) > 0
+        ]
+        if not fields:
+            continue
+
+        model = group.get("model", "")
+        protocol = group.get("protocol", "")
+        event_count = group.get("event_count", 0)
+
+        for field in fields:
+            name = field.get("name", "")
+            present_count = field.get("present_count", 0)
+            missing_count = field.get("missing_count", 0)
+            values = field.get("values") or []
+            note = DECODED_FIELD_NOTES.get(name, "Optional decoded field")
+
+            if values:
+                values_html = "".join(
+                    pill(f"{value.get('value', '')} × {value.get('count', 0)}", "info")
+                    for value in values
+                )
+            else:
+                values_html = '<span class="muted">—</span>'
+
+            rows_html += f"""
+          <tr>
+            <td>{safe_text(model)}</td>
+            <td>{safe_text(protocol)}</td>
+            <td>{safe_text(event_count)}</td>
+            <td>{safe_text(name)}</td>
+            <td>{safe_text(present_count)}</td>
+            <td>{safe_text(missing_count)}</td>
+            <td>{values_html}</td>
+            <td>{safe_text(note)}</td>
+          </tr>
+"""
+
+    if not rows_html:
+        return ""
+
+    return f"""
+      <h3>By model / protocol</h3>
+      <p class="muted">Grouped by rtl_433 model and protocol. Flags, state, and status are decoder-specific raw values and should not be compared across different models.</p>
+      <table>
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Protocol</th>
+            <th>Events</th>
+            <th>Field</th>
+            <th>Present</th>
+            <th>Missing</th>
+            <th>Top values</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+{rows_html}
+        </tbody>
+      </table>
+"""
 
 
 def recent_passes_section(rows):

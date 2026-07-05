@@ -640,24 +640,7 @@ DECODED_FIELD_NAMES = ["moving", "flags", "state", "status", "learn", "mic"]
 DECODED_FIELD_TOP_VALUES = 8
 
 
-def summarize_decoded_fields(events):
-    field_present_counts = {name: 0 for name in DECODED_FIELD_NAMES}
-    field_value_counts = {name: Counter() for name in DECODED_FIELD_NAMES}
-    total_events = 0
-
-    for event in events:
-        total_events += 1
-        raw = event.get("raw") if isinstance(event.get("raw"), dict) else {}
-
-        for name in DECODED_FIELD_NAMES:
-            if name not in raw:
-                continue
-            value = raw[name]
-            if value is None or value == "":
-                continue
-            field_present_counts[name] += 1
-            field_value_counts[name][str(value)] += 1
-
+def _decoded_field_rows(field_present_counts, field_value_counts, total_events):
     fields = []
     for name in DECODED_FIELD_NAMES:
         present_count = field_present_counts[name]
@@ -672,8 +655,59 @@ def summarize_decoded_fields(events):
             "missing_count": total_events - present_count,
             "values": [{"value": value, "count": count} for value, count in values],
         })
+    return fields
+
+
+def summarize_decoded_fields(events):
+    field_present_counts = {name: 0 for name in DECODED_FIELD_NAMES}
+    field_value_counts = {name: Counter() for name in DECODED_FIELD_NAMES}
+    total_events = 0
+
+    group_event_counts = defaultdict(int)
+    group_present_counts = defaultdict(lambda: {name: 0 for name in DECODED_FIELD_NAMES})
+    group_value_counts = defaultdict(lambda: {name: Counter() for name in DECODED_FIELD_NAMES})
+
+    for event in events:
+        total_events += 1
+        raw = event.get("raw") if isinstance(event.get("raw"), dict) else {}
+
+        model_value = event.get("model")
+        protocol_value = event.get("protocol")
+        model = str(model_value) if model_value not in (None, "") else "Unknown model"
+        protocol = str(protocol_value) if protocol_value not in (None, "") else "Unknown protocol"
+        group_key = (model, protocol)
+        group_event_counts[group_key] += 1
+
+        for name in DECODED_FIELD_NAMES:
+            if name not in raw:
+                continue
+            value = raw[name]
+            if value is None or value == "":
+                continue
+            field_present_counts[name] += 1
+            field_value_counts[name][str(value)] += 1
+            group_present_counts[group_key][name] += 1
+            group_value_counts[group_key][name][str(value)] += 1
+
+    fields = _decoded_field_rows(field_present_counts, field_value_counts, total_events)
+
+    groups = []
+    for group_key in sorted(group_event_counts, key=lambda key: (-group_event_counts[key], key)):
+        model, protocol = group_key
+        group_total = group_event_counts[group_key]
+        groups.append({
+            "model": model,
+            "protocol": protocol,
+            "event_count": group_total,
+            "fields": _decoded_field_rows(
+                group_present_counts[group_key],
+                group_value_counts[group_key],
+                group_total,
+            ),
+        })
 
     return {
         "total_events": total_events,
         "fields": fields,
+        "groups": groups,
     }
