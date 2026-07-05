@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.19
+
+### Added
+
+- Added a Decoded TPMS Fields breakdown grouped by rtl_433 model/protocol for decoder-specific fields such as flags, state, and status.
+- Added a Decoded flags observed section to Known & Watchlist Vehicle Details drawers, showing observed raw flags values and counts for a vehicle's sensors.
+- Added a mixed model/protocol warning in the decoded flags drawer section when a vehicle's sensors span multiple rtl_433 models or protocols.
+- Added a developer helper script for injecting a synthetic decoded-flags test vehicle in development databases.
+
+### Changed
+
+- Consolidated the decoded field name list so the Decoded TPMS Fields and Recent Events sections reuse the same shared constant.
+
 ## 0.3.18
 
 ### Added
