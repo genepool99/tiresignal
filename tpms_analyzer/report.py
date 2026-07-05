@@ -16,6 +16,7 @@ from tpms_config import (
     VERY_STRONG_PASS_COUNT,
 )
 from utils import category_label, compute_signal_tags, display_dt, display_time, parse_time, safe_text
+from analysis import DECODED_FIELD_NAMES
 
 from report_css import CSS_BLOCK
 from report_js import JS_BLOCK
@@ -1951,8 +1952,6 @@ def recent_events_section(rows):
         <tbody>
 """
 
-    decoded_field_names = ["moving", "flags", "state", "status", "learn", "mic"]
-
     for event in rows:
         pressure = event["pressure_psi"] if event["pressure_psi"] is not None else event["pressure_kpa"]
         event_time = display_dt(event["event_time"]) if event["event_time"] else safe_text(event["event_time_text"])
@@ -1960,7 +1959,7 @@ def recent_events_section(rows):
         raw = event.get("raw") if isinstance(event.get("raw"), dict) else {}
         decoded_pills = [
             pill(f"{name}={raw[name]}", "info")
-            for name in decoded_field_names
+            for name in DECODED_FIELD_NAMES
             if raw.get(name) is not None and raw.get(name) != ""
         ]
         decoded_html = "".join(decoded_pills) if decoded_pills else '<span class="muted">—</span>'
