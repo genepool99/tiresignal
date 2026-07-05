@@ -711,3 +711,41 @@ def summarize_decoded_fields(events):
         "fields": fields,
         "groups": groups,
     }
+
+
+def summarize_flags_for_sensor_ids(events, sensor_ids):
+    wanted_sensor_ids = {str(sensor_id) for sensor_id in sensor_ids}
+
+    field_present_counts = {name: 0 for name in DECODED_FIELD_NAMES}
+    field_value_counts = {name: Counter() for name in DECODED_FIELD_NAMES}
+    total_events = 0
+
+    for event in events:
+        if str(event.get("sensor_id")) not in wanted_sensor_ids:
+            continue
+        total_events += 1
+        raw = event.get("raw") if isinstance(event.get("raw"), dict) else {}
+
+        value = raw.get("flags")
+        if value is None or value == "":
+            continue
+        field_present_counts["flags"] += 1
+        field_value_counts["flags"][str(value)] += 1
+
+    if total_events == 0:
+        return None
+
+    flags_row = next(
+        row for row in _decoded_field_rows(field_present_counts, field_value_counts, total_events)
+        if row["name"] == "flags"
+    )
+
+    if flags_row["present_count"] == 0:
+        return None
+
+    return {
+        "total_events": total_events,
+        "present_count": flags_row["present_count"],
+        "missing_count": flags_row["missing_count"],
+        "values": flags_row["values"],
+    }

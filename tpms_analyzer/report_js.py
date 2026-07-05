@@ -589,6 +589,25 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       evidenceHtml += `<div class="chart-inline-note">Last seen: ${escHtml(c.last_seen || "—")}</div>`;
       evidenceHtml += `</div>`;
 
+      let decodedFlagsHtml = "";
+      const decodedFlags = c.decoded_flags;
+      if (decodedFlags && Array.isArray(decodedFlags.values) && decodedFlags.values.length > 0) {
+        decodedFlagsHtml += `<div class="drawer-block drawer-decoded-flags-section">`;
+        decodedFlagsHtml += `<div class="chart-inline-note drawer-section-heading">Decoded flags observed</div>`;
+        decodedFlagsHtml += `<div class="matching-summary-grid drawer-stat-grid">`;
+        decodedFlagsHtml += `<div class="matching-summary-item"><span class="matching-summary-value">${escHtml(decodedFlags.total_events ?? "")}</span><span class="matching-summary-label">Events</span></div>`;
+        decodedFlagsHtml += `<div class="matching-summary-item"><span class="matching-summary-value">${escHtml(decodedFlags.present_count ?? "")}</span><span class="matching-summary-label">Present</span></div>`;
+        decodedFlagsHtml += `<div class="matching-summary-item"><span class="matching-summary-value">${escHtml(decodedFlags.missing_count ?? "")}</span><span class="matching-summary-label">Missing</span></div>`;
+        decodedFlagsHtml += `</div>`;
+        decodedFlagsHtml += `<div class="drawer-pill-row">`;
+        decodedFlags.values.forEach(v => {
+          decodedFlagsHtml += `<span class="pill info">${escHtml(v.value)} × ${escHtml(v.count)}</span>`;
+        });
+        decodedFlagsHtml += `</div>`;
+        decodedFlagsHtml += `<div class="chart-inline-note drawer-note-hint">Raw rtl_433 decoder-specific values. Do not compare across different models/protocols.</div>`;
+        decodedFlagsHtml += `</div>`;
+      }
+
       let technicalHtml = `<details class="drawer-technical-details">`;
       technicalHtml += `<summary>Technical details</summary>`;
       technicalHtml += `<div class="drawer-technical-body">`;
@@ -610,7 +629,7 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       technicalHtml += `</div>`;
       technicalHtml += `</details>`;
 
-      return summaryHtml + whyHtml + evidenceHtml + technicalHtml;
+      return summaryHtml + whyHtml + evidenceHtml + decodedFlagsHtml + technicalHtml;
     }
 
     function filterTable(tableId, query) {

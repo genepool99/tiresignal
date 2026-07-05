@@ -16,7 +16,7 @@ from tpms_config import (
     VERY_STRONG_PASS_COUNT,
 )
 from utils import category_label, compute_signal_tags, display_dt, display_time, parse_time, safe_text
-from analysis import DECODED_FIELD_NAMES
+from analysis import DECODED_FIELD_NAMES, summarize_flags_for_sensor_ids
 
 from report_css import CSS_BLOCK
 from report_js import JS_BLOCK
@@ -394,7 +394,7 @@ def write_report(context):
     html += presence_summary_section(presence_summary)
     html += presence_timeline_section(presence_timeline)
     html += traffic_heatmap_section(traffic_heatmap)
-    html += known_vehicle_section(known_vehicle_summaries)
+    html += known_vehicle_section(known_vehicle_summaries, events)
 
     if ignored_vehicles:
         html += ignored_vehicle_section(ignored_vehicles)
@@ -919,7 +919,7 @@ def traffic_heatmap_section(traffic_heatmap):
     return html
 
 
-def known_vehicle_section(rows):
+def known_vehicle_section(rows, events):
     html = f"""
     <div class="section">
       <h2>Known &amp; Watchlist Vehicles</h2>
@@ -1013,6 +1013,11 @@ def known_vehicle_section(rows):
             "sensor_ids": sensor_ids,
             "pattern_labels": [],
         }
+
+        flags_summary = summarize_flags_for_sensor_ids(events, sensor_ids)
+        if flags_summary:
+            details_payload["decoded_flags"] = flags_summary
+
         menu_items.append({"label": "Details", "payload": details_payload, "handler": "openCandidateDrawer", "data_attr": "candidate"})
 
         html += f"""
