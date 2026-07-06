@@ -15,7 +15,7 @@ from tpms_config import (
     VEHICLE_MAP_PATH,
     VERY_STRONG_PASS_COUNT,
 )
-from utils import category_label, compute_signal_tags, display_dt, display_time, parse_time, safe_text
+from utils import category_label, compute_signal_tags, display_dt, display_time, normalize_sensor_id, parse_time, safe_text
 from analysis import DECODED_FIELD_NAMES, summarize_flags_for_sensor_ids
 
 from report_css import CSS_BLOCK
@@ -198,6 +198,37 @@ def compute_mixed_sensor_label(sensor_ids, sensor_model_map, sensor_protocol_map
             ),
         }
     return None
+
+
+def build_default_candidate_name(prefix, row, sensor_model_map=None, sensor_protocol_map=None):
+    sensor_ids = row.get("sensor_ids") or []
+    sensor_count = row.get("sensor_count", len(sensor_ids))
+    normalized_ids = sorted(nid for nid in (normalize_sensor_id(sid) for sid in sensor_ids) if nid)
+    first_sensor_id = normalized_ids[0] if normalized_ids else "unknown"
+
+    model_protocol_text = None
+    mixed_label = None
+    if sensor_model_map is not None or sensor_protocol_map is not None:
+        mixed_label = compute_mixed_sensor_label(sensor_ids, sensor_model_map or {}, sensor_protocol_map or {})
+    if mixed_label:
+        model_protocol_text = mixed_label["text"]
+    elif sensor_model_map is not None or sensor_protocol_map is not None:
+        models = set().union(*((sensor_model_map or {}).get(sid, set()) for sid in sensor_ids)) if sensor_ids else set()
+        protocols = set().union(*((sensor_protocol_map or {}).get(sid, set()) for sid in sensor_ids)) if sensor_ids else set()
+        if models and protocols:
+            model_protocol_text = f"{next(iter(models))} / {next(iter(protocols))}"
+        elif models:
+            model_protocol_text = next(iter(models))
+        elif protocols:
+            model_protocol_text = next(iter(protocols))
+
+    sensor_word = "sensor" if sensor_count == 1 else "sensors"
+    parts = [prefix]
+    if model_protocol_text:
+        parts.append(model_protocol_text)
+    parts.append(f"{sensor_count} {sensor_word}")
+    parts.append(first_sensor_id)
+    return " · ".join(parts)[:120]
 
 
 PATTERN_LABEL_DESCRIPTIONS = {
@@ -1176,9 +1207,11 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, s
 """
 
     for index, row in enumerate(rows, start=1):
-        candidate_name = f"Unknown Candidate {index}"
-        candidate_notes = f"Generated from TPMS report. Pass count: {row['pass_count']}"
         sensor_ids = row["sensor_ids"]
+        candidate_name = build_default_candidate_name(
+            "Unknown Candidate", row, sensor_model_map, sensor_protocol_map
+        )
+        candidate_notes = f"Generated from TPMS report. Pass count: {row['pass_count']}"
 
         snippet = {
             "name": candidate_name,
@@ -1373,7 +1406,9 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
                 menu_items.append({"label": "Ignore", "payload": ignore_payload, "handler": "rowMenuSubmitAction"})
             menu_items.append({"label": "Details", "payload": details_payload, "handler": "openCandidateDrawer", "data_attr": "candidate"})
         else:
-            candidate_name = f"Unknown Candidate {index}"
+            candidate_name = build_default_candidate_name(
+                "Unknown Candidate", row, sensor_model_map, sensor_protocol_map
+            )
             candidate_notes = f"Pass count: {row['pass_count']}"
             watch_payload = {
                 "action": "add",
@@ -1504,7 +1539,9 @@ def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=No
             if category != "ignore":
                 menu_items.append({"label": "Ignore", "payload": ignore_payload, "handler": "rowMenuSubmitAction"})
         else:
-            candidate_name = f"Exact Repeat Candidate {index}"
+            candidate_name = build_default_candidate_name(
+                "Exact Repeat", row, sensor_model_map, sensor_protocol_map
+            )
             candidate_notes = f"Pass count: {row['pass_count']}"
             watch_payload = {
                 "action": "add",
