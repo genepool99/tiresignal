@@ -370,6 +370,14 @@ def write_report(context):
       <button
         type="button"
         class="tab-button"
+        data-tab-target="tab-vehicles"
+        onclick="showReportTab('tab-vehicles')"
+      >
+        Vehicles
+      </button>
+      <button
+        type="button"
+        class="tab-button"
         data-tab-target="tab-candidates"
         onclick="showReportTab('tab-candidates')"
       >
@@ -425,6 +433,12 @@ def write_report(context):
     html += presence_summary_section(presence_summary)
     html += presence_timeline_section(presence_timeline)
     html += traffic_heatmap_section(traffic_heatmap)
+
+    html += """
+    </div>
+
+    <div id="tab-vehicles" class="tab-panel" role="tabpanel">
+"""
     html += known_vehicle_section(known_vehicle_summaries, events)
 
     if ignored_vehicles:
