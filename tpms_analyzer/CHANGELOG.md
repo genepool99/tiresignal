@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.20
+
+### Added
+
+- Added a dedicated Vehicles tab after Overview for vehicle-map management.
+
+### Changed
+
+- Moved Known & Watchlist Vehicles and Ignored Vehicles out of Overview and into the new Vehicles tab.
+- Improved generated default names for new known/watchlist vehicle entries so they use stable candidate evidence instead of report row numbers.
+
 ## 0.3.19
 
 ### Added
