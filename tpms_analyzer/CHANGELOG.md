@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.21
+
+### Fixed
+
+- Hid rtl_433 status/statistics reports from the Raw Packets table so decoder summary JSON no longer stretches the report.
+
 ## 0.3.20
 
 ### Added
