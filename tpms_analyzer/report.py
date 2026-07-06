@@ -2070,7 +2070,12 @@ def raw_packets_section(lines):
             packet = json.loads(line)
 
             if isinstance(packet, dict):
-                if isinstance(packet.get("rows"), list) and "frames" in packet:
+                if (
+                    isinstance(packet.get("stats"), list)
+                    and "frames" in packet
+                    and ("enabled" in packet or "since" in packet)
+                    and "model" not in packet
+                ):
                     continue
                 packet_time = packet.get("time", "")
                 model = packet.get("model", "")
