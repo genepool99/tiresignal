@@ -60,6 +60,18 @@ def human_dt(dt, now=None):
     return local_dt.strftime("%b %-d, %Y, %-I:%M %p")
 
 
+def exact_dt(dt):
+    if not dt:
+        return "—"
+
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+
+    local_dt = dt.astimezone()
+
+    return local_dt.strftime("%m/%d/%y %-I:%M:%S %p")
+
+
 def display_time(value):
     dt = parse_time(value)
 
@@ -69,11 +81,27 @@ def display_time(value):
     return safe_text(human_dt(dt))
 
 
+def display_exact_time(value):
+    dt = parse_time(value)
+
+    if not dt:
+        return "—"
+
+    return safe_text(exact_dt(dt))
+
+
 def display_dt(dt):
     if not dt:
         return "—"
 
     return safe_text(human_dt(dt))
+
+
+def display_exact_dt(dt):
+    if not dt:
+        return "—"
+
+    return safe_text(exact_dt(dt))
 
 
 def safe_text(value):

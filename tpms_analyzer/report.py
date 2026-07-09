@@ -15,7 +15,17 @@ from tpms_config import (
     VEHICLE_MAP_PATH,
     VERY_STRONG_PASS_COUNT,
 )
-from utils import category_label, compute_signal_tags, display_dt, display_time, normalize_sensor_id, parse_time, safe_text
+from utils import (
+    category_label,
+    compute_signal_tags,
+    display_dt,
+    display_exact_dt,
+    display_exact_time,
+    display_time,
+    normalize_sensor_id,
+    parse_time,
+    safe_text,
+)
 from analysis import DECODED_FIELD_NAMES, summarize_flags_for_sensor_ids
 
 from report_css import CSS_BLOCK
@@ -278,6 +288,52 @@ def saved_match_html(known_vehicle, category, known_match):
             return f'{name_pill}<br><span class="muted">{safe_text(match_text)}</span>'
         return name_pill
     return '<span class="muted">No saved match</span>'
+
+
+def is_relative_time_text(value):
+    text = str(value or "")
+
+    return (
+        text == "just now"
+        or text.endswith(" min ago")
+        or text.endswith(" hour ago")
+        or text.endswith(" hours ago")
+    )
+
+
+def dual_time_html(primary_text, exact_text):
+    if exact_text == "—":
+        return "—"
+
+    relative_html = ""
+
+    if is_relative_time_text(primary_text):
+        relative_html = (
+            f'<span class="timestamp-relative">'
+            f'{primary_text}'
+            f'</span>'
+        )
+
+    return (
+        f'<span class="timestamp-display">'
+        f'<span class="timestamp-exact">{exact_text}</span>'
+        f'{relative_html}'
+        f'</span>'
+    )
+
+
+def display_time_html(value):
+    return dual_time_html(
+        display_time(value),
+        display_exact_time(value),
+    )
+
+
+def display_dt_html(dt):
+    return dual_time_html(
+        display_dt(dt),
+        display_exact_dt(dt),
+    )
 
 
 def pattern_pills(labels):
@@ -753,7 +809,7 @@ def presence_summary_section(presence_summary):
 
         html += f"""
           <tr>
-            <td>{display_time(event.get("start"))}</td>
+            <td>{display_time_html(event.get("start"))}</td>
             <td>{safe_text(type_label)}</td>
             <td>{safe_text(vehicle_text)}</td>
             <td>{safe_text(duration_seconds)}s</td>
@@ -1055,6 +1111,8 @@ def known_vehicle_section(rows, events):
             "pass_count": row["seen_count"],
             "first_seen": display_time(row["first_seen"]),
             "last_seen": display_time(row["last_seen"]),
+            "first_seen_exact": display_exact_time(row["first_seen"]),
+            "last_seen_exact": display_exact_time(row["last_seen"]),
             "sensor_ids": sensor_ids,
             "pattern_labels": [],
         }
@@ -1072,8 +1130,8 @@ def known_vehicle_section(rows, events):
             <td>{row["seen_today"]}</td>
             <td>{row["seen_count"]}</td>
             <td>{safe_text(row["best_match"])}</td>
-            <td>{display_time(row["first_seen"])}</td>
-            <td>{display_time(row["last_seen"])}</td>
+            <td>{display_time_html(row["first_seen"])}</td>
+            <td>{display_time_html(row["last_seen"])}</td>
             <td>{safe_text(", ".join(sensor_ids))}</td>
             <td>{safe_text(row["notes"])}</td>
             <td class="actions-cell">{row_actions_menu(menu_items)}</td>
@@ -1274,6 +1332,8 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, s
             "pass_count": row["pass_count"],
             "first_seen": display_time(row["first_seen"]),
             "last_seen": display_time(row["last_seen"]),
+            "first_seen_exact": display_exact_time(row["first_seen"]),
+            "last_seen_exact": display_exact_time(row["last_seen"]),
             "sensor_ids": sensor_ids,
             "pattern_labels": all_labels,
         }
@@ -1285,8 +1345,8 @@ def new_unknown_section(rows, sensor_model_map=None, sensor_protocol_map=None, s
             <td>{signals_html}</td>
             <td>{row["pass_count"]}</td>
             <td>{row["sensor_count"]}</td>
-            <td>{display_time(row["first_seen"])}</td>
-            <td>{display_time(row["last_seen"])}</td>
+            <td>{display_time_html(row["first_seen"])}</td>
+            <td>{display_time_html(row["last_seen"])}</td>
             <td>{safe_text(", ".join(sensor_ids))}</td>
             <td><div class="copybox">{safe_text(json.dumps(snippet, indent=2))}</div></td>
             <td class="actions-cell">{row_actions_menu(menu_items, label="Candidate actions")}</td>
@@ -1386,6 +1446,8 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
             "pass_count": row["pass_count"],
             "first_seen": display_time(row["first_seen"]),
             "last_seen": display_time(row["last_seen"]),
+            "first_seen_exact": display_exact_time(row["first_seen"]),
+            "last_seen_exact": display_exact_time(row["last_seen"]),
             "sensor_ids": sensor_ids,
             "pattern_labels": pattern_labels,
         }
@@ -1453,8 +1515,8 @@ def overlap_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=
             <td>{overlap_signals_html}</td>
             <td>{row["pass_count"]}</td>
             <td>{row["sensor_count"]}</td>
-            <td>{display_time(row["first_seen"])}</td>
-            <td>{display_time(row["last_seen"])}</td>
+            <td>{display_time_html(row["first_seen"])}</td>
+            <td>{display_time_html(row["last_seen"])}</td>
             <td>{safe_text(", ".join(row["sensor_ids"]))}</td>
             <td class="actions-cell">{row_actions_menu(menu_items, label="Candidate actions")}</td>
           </tr>
@@ -1595,6 +1657,8 @@ def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=No
             "pass_count": row["pass_count"],
             "first_seen": display_time(row["first_seen"]),
             "last_seen": display_time(row["last_seen"]),
+            "first_seen_exact": display_exact_time(row["first_seen"]),
+            "last_seen_exact": display_exact_time(row["last_seen"]),
             "sensor_ids": sensor_ids,
             "pattern_labels": all_labels,
         }
@@ -1607,8 +1671,8 @@ def exact_candidates_section(rows, sensor_model_map=None, sensor_protocol_map=No
             <td>{exact_signals_html}</td>
             <td>{row["pass_count"]}</td>
             <td>{row["sensor_count"]}</td>
-            <td>{display_time(row["first_seen"])}</td>
-            <td>{display_time(row["last_seen"])}</td>
+            <td>{display_time_html(row["first_seen"])}</td>
+            <td>{display_time_html(row["last_seen"])}</td>
             <td>{safe_text(", ".join(row["sensor_ids"]))}</td>
             <td class="actions-cell">{row_actions_menu(menu_items, label="Candidate actions")}</td>
           </tr>
@@ -1890,7 +1954,7 @@ def recent_passes_section(rows):
             <td>{vehicle_status_html(row["known_vehicle"], row["category"])}</td>
             <td>{category_pill(row["category"] or "unknown")}</td>
             <td>{safe_text(known_match_text(row["known_match"]))}</td>
-            <td>{display_dt(row["start"])}</td>
+            <td>{display_dt_html(row["start"])}</td>
             <td>{row["duration_seconds"]}s</td>
             <td>{row["sensor_count"]} {crowded_indicator}</td>
             <td>{row["event_count"]}</td>
@@ -1959,8 +2023,8 @@ def sensor_section(rows):
             <td>{category_pill(row["category"] or "unknown")}</td>
             <td>{safe_text(row["sensor_id"])}</td>
             <td>{row["count"]}</td>
-            <td>{display_time(row["first_seen"])}</td>
-            <td>{display_time(row["last_seen"])}</td>
+            <td>{display_time_html(row["first_seen"])}</td>
+            <td>{display_time_html(row["last_seen"])}</td>
             <td>{safe_text(row["models"])}</td>
             <td>{safe_text(pressure if pressure is not None else "")}</td>
             <td>{safe_text(row["avg_temperature_c"] if row["avg_temperature_c"] is not None else "")}</td>
@@ -2010,7 +2074,7 @@ def recent_events_section(rows):
 
     for event in rows:
         pressure = event["pressure_psi"] if event["pressure_psi"] is not None else event["pressure_kpa"]
-        event_time = display_dt(event["event_time"]) if event["event_time"] else safe_text(event["event_time_text"])
+        event_time = display_dt_html(event["event_time"]) if event["event_time"] else safe_text(event["event_time_text"])
 
         raw = event.get("raw") if isinstance(event.get("raw"), dict) else {}
         decoded_pills = [
@@ -2126,11 +2190,11 @@ def diagnostics_summary_section(generated_at, events, sensor_summaries, raw_pack
             return "—"
 
         mtime = datetime.fromtimestamp(path.stat().st_mtime).astimezone()
-        return display_dt(mtime)
+        return display_dt_html(mtime)
 
     event_times = [e["event_time"] for e in events if e.get("event_time") is not None]
-    oldest_event_time = display_dt(min(event_times)) if event_times else "—"
-    newest_event_time = display_dt(max(event_times)) if event_times else "—"
+    oldest_event_time = display_dt_html(min(event_times)) if event_times else "—"
+    newest_event_time = display_dt_html(max(event_times)) if event_times else "—"
 
     events_with_pressure = sum(
         1 for e in events if e.get("pressure_psi") is not None or e.get("pressure_kpa") is not None
@@ -2153,7 +2217,7 @@ def diagnostics_summary_section(generated_at, events, sensor_summaries, raw_pack
           <tr><th>Database path</th><td><code>{safe_text(DB_PATH)}</code></td></tr>
           <tr><th>Database file size</th><td>{safe_text(format_file_size(DB_PATH))}</td></tr>
           <tr><th>Vehicle map path</th><td><code>{safe_text(VEHICLE_MAP_PATH)}</code></td></tr>
-          <tr><th>Vehicle map modified</th><td>{safe_text(format_file_mtime(VEHICLE_MAP_PATH))}</td></tr>
+          <tr><th>Vehicle map modified</th><td>{format_file_mtime(VEHICLE_MAP_PATH)}</td></tr>
           <tr><th>Total events loaded</th><td>{len(events)}</td></tr>
           <tr><th>Unique sensor IDs</th><td>{len(sensor_summaries)}</td></tr>
           <tr><th>Oldest event time</th><td>{oldest_event_time}</td></tr>

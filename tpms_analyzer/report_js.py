@@ -497,6 +497,44 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       return category;
     }
 
+    function isRelativeTimeText(value) {
+      const text = String(value || "");
+
+      return (
+        text === "just now"
+        || text.endsWith(" min ago")
+        || text.endsWith(" hour ago")
+        || text.endsWith(" hours ago")
+      );
+    }
+
+    function drawerTimeHtml(label, relativeValue, exactValue) {
+      const relativeText = relativeValue || "—";
+      const exactText = exactValue || "";
+      const hasExactText = exactText && exactText !== "—";
+      const visibleText = hasExactText ? exactText : relativeText;
+
+      let relativeHtml = "";
+
+      if (hasExactText && isRelativeTimeText(relativeText)) {
+        relativeHtml = (
+          `<span class="timestamp-relative">`
+          + `${escHtml(relativeText)}`
+          + `</span>`
+        );
+      }
+
+      return (
+        `<div class="drawer-timestamp-row">`
+        + `<span class="drawer-timestamp-label">${escHtml(label)}</span>`
+        + `<span class="drawer-timestamp-values">`
+        + `<span class="timestamp-exact">${escHtml(visibleText)}</span>`
+        + `${relativeHtml}`
+        + `</span>`
+        + `</div>`
+      );
+    }
+
     function renderCandidateDrawer(c) {
       const sensorIds = Array.isArray(c.sensor_ids) ? c.sensor_ids : [];
       const patternLabels = Array.isArray(c.pattern_labels) ? c.pattern_labels : [];
@@ -585,8 +623,16 @@ JS_BLOCK = """    function getServiceBaseUrl() {
           evidenceHtml += `<div class="chart-inline-note">Protocols: ${escHtml(protocols.join(", "))}</div>`;
         }
       }
-      evidenceHtml += `<div class="chart-inline-note">First seen: ${escHtml(c.first_seen || "—")}</div>`;
-      evidenceHtml += `<div class="chart-inline-note">Last seen: ${escHtml(c.last_seen || "—")}</div>`;
+      evidenceHtml += drawerTimeHtml(
+        "First seen",
+        c.first_seen,
+        c.first_seen_exact
+      );
+      evidenceHtml += drawerTimeHtml(
+        "Last seen",
+        c.last_seen,
+        c.last_seen_exact
+      );
       evidenceHtml += `</div>`;
 
       let decodedFlagsHtml = "";

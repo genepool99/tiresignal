@@ -60,6 +60,27 @@ CSS_BLOCK = """
       color: var(--muted);
     }
 
+    .timestamp-display {
+      display: inline-flex;
+      flex-direction: column;
+      gap: 2px;
+      min-width: 0;
+    }
+
+    .timestamp-exact {
+      color: var(--text);
+      white-space: nowrap;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .timestamp-relative {
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 600;
+      line-height: 1.2;
+      white-space: nowrap;
+    }
+
     .cards {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
@@ -1180,6 +1201,63 @@ CSS_BLOCK = """
       font-size: 12px;
       line-height: 1.4;
       color: var(--muted);
+    }
+
+    .drawer-timestamp-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .drawer-timestamp-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .drawer-timestamp-label {
+      color: var(--muted);
+      font-weight: 700;
+      flex: 0 0 auto;
+    }
+
+    .drawer-timestamp-values {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .drawer-timestamp-row .timestamp-exact {
+      font-weight: 600;
+    }
+
+    .drawer-timestamp-row .timestamp-relative {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 7px;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      background: var(--soft);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    @media (max-width: 480px) {
+      .drawer-timestamp-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 3px;
+      }
+
+      .drawer-timestamp-values {
+        gap: 6px;
+      }
     }
 
     .drawer-evidence-section .chart-inline-note {
