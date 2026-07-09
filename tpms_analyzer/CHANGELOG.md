@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.22
+
+### Changed
+
+- Updated report timestamps to show the full local date and time as the primary value.
+- Added smaller relative-time text for recent timestamps where “just now,” minutes ago, or hours ago provides useful context.
+- Added compact relative-time badges to First Seen and Last Seen values in Candidate Details.
+- Removed hover-only relative timestamps and avoided duplicate date displays for older events.
+
 ## 0.3.21
 
 ### Fixed
