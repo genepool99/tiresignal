@@ -1022,6 +1022,30 @@ JS_BLOCK = """    function getServiceBaseUrl() {
         .sort((a, b) => a.label.localeCompare(b.label));
     }
 
+    function dailyRowsForSelectedRange(points, selectedRange) {
+      const hasFullDailyCounts = typeof allDailyEventCounts !== "undefined"
+        && Array.isArray(allDailyEventCounts)
+        && allDailyEventCounts.length > 0;
+
+      if (selectedRange === "all" && hasFullDailyCounts) {
+        return allDailyEventCounts.map(row => ({ label: row.date, count: row.count }));
+      }
+
+      return countByDate(points);
+    }
+
+    function hourlyRowsForSelectedRange(points, selectedRange) {
+      const hasFullHourlyCounts = typeof allHourlyEventCounts !== "undefined"
+        && Array.isArray(allHourlyEventCounts)
+        && allHourlyEventCounts.length > 0;
+
+      if (selectedRange === "all" && hasFullHourlyCounts) {
+        return allHourlyEventCounts.map(row => ({ label: row.hour, count: row.count }));
+      }
+
+      return hourlyCountsFor(points);
+    }
+
     function numericValue(value) {
       if (value === null || value === undefined || value === "") {
         return null;
@@ -1269,6 +1293,8 @@ JS_BLOCK = """    function getServiceBaseUrl() {
 
     function renderCharts() {
       const points = getFilteredChartPointsByTime();
+      const chartRangeFilter = document.getElementById("chart-time-filter");
+      const selectedRange = chartRangeFilter ? chartRangeFilter.value : "all";
       const emptyMessage = "No data for selected time range";
       const suspiciousPressureToggle = document.getElementById("chart-show-suspicious-pressure");
       const showSuspiciousPressure = Boolean(suspiciousPressureToggle && suspiciousPressureToggle.checked);
@@ -1329,7 +1355,7 @@ JS_BLOCK = """    function getServiceBaseUrl() {
         renderBarChart(
           "dailyChart",
           "TPMS events per day",
-          countByDate(points),
+          dailyRowsForSelectedRange(points, selectedRange),
           "Date",
           "Event count",
           emptyMessage
@@ -1340,7 +1366,7 @@ JS_BLOCK = """    function getServiceBaseUrl() {
         renderBarChart(
           "hourlyChart",
           "TPMS events by hour of day",
-          hourlyCountsFor(points),
+          hourlyRowsForSelectedRange(points, selectedRange),
           "Hour",
           "Event count",
           emptyMessage

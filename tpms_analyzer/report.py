@@ -366,6 +366,8 @@ def write_report(context):
     presence_summary = context.get("presence_summary", {})
     presence_timeline = context.get("presence_timeline", {})
     traffic_heatmap = context.get("traffic_heatmap", {})
+    daily_counts = context.get("daily_counts", [])
+    hourly_counts = context.get("hourly_counts", [])
 
     sensor_model_map = defaultdict(set)
     sensor_protocol_map = defaultdict(set)
@@ -555,7 +557,7 @@ def write_report(context):
     html += """
     </div>
 """
-    html += html_end(timeline_points)
+    html += html_end(timeline_points, daily_counts, hourly_counts)
 
     REPORT_PATH.write_text(html, encoding="utf-8")
 
@@ -2261,13 +2263,15 @@ def import_stats_section(stats, prune_stats):
 """
 
 
-def html_end(timeline_points):
+def html_end(timeline_points, daily_counts, hourly_counts):
     return (
         CANDIDATE_DRAWER_HTML
         + "\n  </main>\n\n"
         + '  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>\n'
         + "  <script>\n"
         + f"    const allTimelinePoints = {json.dumps(timeline_points)};\n"
+        + f"    const allDailyEventCounts = {json.dumps(daily_counts)};\n"
+        + f"    const allHourlyEventCounts = {json.dumps(hourly_counts)};\n"
         + JS_BLOCK
         + "  </script>\n</body>\n</html>"
     )
