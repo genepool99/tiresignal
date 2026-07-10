@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.23
+
+### Fixed
+
+- Fixed Daily TPMS Event Volume to use the complete event history when viewing **All time**, instead of being limited to the most recent 10,000 events.
+- Fixed Hourly TPMS Event Volume to use the complete event history when viewing **All time**, while preserving the existing time-filter behavior for shorter ranges.
+
+### Performance
+
+- Kept the 10,000-event limit for raw timeline and scatter charts to maintain responsive report performance while using lightweight pre-aggregated data for historical volume charts.
+
 ## 0.3.22
 
 ### Changed
