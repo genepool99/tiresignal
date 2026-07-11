@@ -156,7 +156,7 @@ JS_BLOCK = """    function getServiceBaseUrl() {
     let _vehicleEditPendingButton = null;
     let _vehicleEditPendingPayload = null;
 
-    function buildCandidateSavedName() {
+    function buildCandidateTimestampName(label) {
       const now = new Date();
       const pad = (n) => String(n).padStart(2, "0");
       const day = pad(now.getDate());
@@ -164,7 +164,7 @@ JS_BLOCK = """    function getServiceBaseUrl() {
       const year = pad(now.getFullYear() % 100);
       const hours = pad(now.getHours());
       const minutes = pad(now.getMinutes());
-      return `Candidate Saved ${day}/${month}/${year} - ${hours}:${minutes}`;
+      return `${label} ${day}/${month}/${year} - ${hours}:${minutes}`;
     }
 
     function openVehicleEditModal(button, payload) {
@@ -188,7 +188,9 @@ JS_BLOCK = """    function getServiceBaseUrl() {
         titleEl.textContent = "Save vehicle";
       }
 
-      nameInput.value = isNewUnmatchedCandidate ? buildCandidateSavedName() : (payload.name || "");
+      nameInput.value = isNewUnmatchedCandidate
+        ? buildCandidateTimestampName(payload.category === "ignore" ? "Candidate Ignored" : "Candidate Saved")
+        : (payload.name || "");
       notesInput.value = payload.notes || "";
       errorEl.hidden = true;
       errorEl.textContent = "";
