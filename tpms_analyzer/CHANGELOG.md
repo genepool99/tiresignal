@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.3.24
+
+### Changed
+
+- Replaced long generated candidate names with concise timestamp-based names when adding new candidates to Watch or Ignore.
+- New Watch entries now default to `Candidate Saved DD/MM/YY - HH:MM`.
+- New Ignore entries now default to `Candidate Ignored DD/MM/YY - HH:MM`.
+- Candidate names continue to use the browser's local time and remain editable before saving.
+
+### Removed
+
+- Removed the obsolete server-side candidate-name generator and dead Watch/Ignore payload name fields.
+- Simplified unmatched candidate labels used by Copy/Paste JSON and Details to `Candidate N`.
+
 ## 0.3.23
 
 ### Fixed
