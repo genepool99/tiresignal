@@ -156,12 +156,27 @@ JS_BLOCK = """    function getServiceBaseUrl() {
     let _vehicleEditPendingButton = null;
     let _vehicleEditPendingPayload = null;
 
+    function buildCandidateSavedName() {
+      const now = new Date();
+      const pad = (n) => String(n).padStart(2, "0");
+      const day = pad(now.getDate());
+      const month = pad(now.getMonth() + 1);
+      const year = pad(now.getFullYear() % 100);
+      const hours = pad(now.getHours());
+      const minutes = pad(now.getMinutes());
+      return `Candidate Saved ${day}/${month}/${year} - ${hours}:${minutes}`;
+    }
+
     function openVehicleEditModal(button, payload) {
       const modal = document.getElementById("vehicleEditModal");
       const titleEl = document.getElementById("vehicleEditModalTitle");
       const nameInput = document.getElementById("vehicleEditNameInput");
       const notesInput = document.getElementById("vehicleEditNotesInput");
       const errorEl = document.getElementById("vehicleEditError");
+
+      const isNewUnmatchedCandidate = payload.action === "add"
+        && (payload.category === "watch" || payload.category === "ignore")
+        && !payload.edit_mode;
 
       if (payload.edit_mode === "saved_vehicle" || payload.action === "edit") {
         titleEl.textContent = "Edit vehicle";
@@ -173,7 +188,7 @@ JS_BLOCK = """    function getServiceBaseUrl() {
         titleEl.textContent = "Save vehicle";
       }
 
-      nameInput.value = payload.name || "";
+      nameInput.value = isNewUnmatchedCandidate ? buildCandidateSavedName() : (payload.name || "");
       notesInput.value = payload.notes || "";
       errorEl.hidden = true;
       errorEl.textContent = "";
