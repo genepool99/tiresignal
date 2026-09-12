@@ -466,12 +466,28 @@ def summarize_overlap_candidates(vehicle_passes, normalized_vehicles):
     ]
 
     clusters = []
+    # Secondary lookup only: maps a sensor ID to the SET of cluster indexes
+    # it currently belongs to. A sensor can belong to more than one cluster
+    # (the >=2-overlap rule below never merges clusters with each other), so
+    # this is intentionally not a union-find / one-sensor-one-cluster map.
+    # It exists purely to narrow, per pass, which clusters are even worth
+    # the exact same overlap/merge check performed below -- it does not
+    # change which cluster is chosen or how merging works.
+    sensor_to_clusters = defaultdict(set)
 
     for vehicle_pass in multi_sensor_passes:
         current_set = set(vehicle_pass["sensor_ids"])
         placed = False
 
-        for cluster in clusters:
+        candidate_indexes = set()
+        for sensor_id in current_set:
+            candidate_indexes |= sensor_to_clusters.get(sensor_id, set())
+
+        # Ascending order reproduces the original `for cluster in clusters`
+        # scan, which always stopped at the first (i.e. earliest-created)
+        # qualifying cluster.
+        for cluster_index in sorted(candidate_indexes):
+            cluster = clusters[cluster_index]
             overlap = current_set.intersection(cluster["sensor_set"])
             merged_sensor_ids = cluster["sensor_set"] | current_set
 
@@ -481,14 +497,19 @@ def summarize_overlap_candidates(vehicle_passes, normalized_vehicles):
             ):
                 cluster["passes"].append(vehicle_pass)
                 cluster["sensor_set"] = merged_sensor_ids
+                for sensor_id in merged_sensor_ids:
+                    sensor_to_clusters[sensor_id].add(cluster_index)
                 placed = True
                 break
 
         if not placed:
+            new_index = len(clusters)
             clusters.append({
                 "sensor_set": set(current_set),
                 "passes": [vehicle_pass],
             })
+            for sensor_id in current_set:
+                sensor_to_clusters[sensor_id].add(new_index)
 
     rows = []
 
