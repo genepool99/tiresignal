@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.29
+
+### Changed
+
+- Reverted the SQLite cursor-streaming experiment in load_events() after benchmarking showed it reduced isolated load-stage memory but did not materially improve whole-refresh peak memory and increased refresh time.
+
 ## 0.3.28
 
 ### Performance
