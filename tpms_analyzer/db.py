@@ -293,7 +293,7 @@ def load_events(conn):
             raw_json
         FROM tpms_events
         ORDER BY event_time ASC
-    """).fetchall()
+    """)
 
     events = []
 
