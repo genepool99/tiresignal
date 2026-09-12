@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.26
+
+### Performance
+
+- Skip SQLite VACUUM during pruning when no events were deleted, avoiding unnecessary full-database rewrites during normal report refreshes.
+
+### Fixed
+
+- Commit pruned event deletions before running VACUUM, preventing SQLite transaction errors when pruning actually removes records.
+
 ## 0.3.25
 
 ### Changed
