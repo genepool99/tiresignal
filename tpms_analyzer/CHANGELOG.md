@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.27
+
+### Performance
+
+- Added an index on TPMS event timestamps so report refreshes can read events in chronological order without building a temporary SQLite sort structure.
+
 ## 0.3.26
 
 ### Performance
