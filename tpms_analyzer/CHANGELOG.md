@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.28
+
+### Performance
+
+- Stream TPMS event rows directly from SQLite during report generation instead of materializing the full query result first, reducing temporary memory duplication during large refreshes.
+
 ## 0.3.27
 
 ### Performance
