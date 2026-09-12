@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.25
+
+### Changed
+
+- Optimized overlap-candidate clustering for large TPMS datasets by replacing the quadratic full-cluster scan with an indexed sensor-to-cluster lookup.
+- Preserved existing candidate matching, merge, ordering, and known-vehicle behavior while substantially reducing report refresh time as event history grows.
+
 ## 0.3.24
 
 ### Changed
