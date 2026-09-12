@@ -409,8 +409,10 @@ def prune_events(conn, normalized_vehicles):
         )
         deleted = len(ids_to_delete)
 
-    conn.execute("VACUUM")
     conn.commit()
+
+    if deleted > 0:
+        conn.execute("VACUUM")
 
     return {
         "enabled": True,
