@@ -50,6 +50,11 @@ def init_db(conn):
     if "maybe_battery" not in columns:
         conn.execute("ALTER TABLE tpms_events ADD COLUMN maybe_battery REAL")
 
+    conn.execute("""
+        CREATE INDEX IF NOT EXISTS idx_tpms_events_event_time
+        ON tpms_events(event_time)
+    """)
+
     conn.commit()
 
 
