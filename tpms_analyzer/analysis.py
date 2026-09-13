@@ -629,9 +629,10 @@ def daily_and_hourly_counts(events):
     hourly = Counter()
 
     for event in events:
-        if event["event_time"]:
-            daily[event["event_time"].strftime("%Y-%m-%d")] += 1
-            hourly[event["event_time"].strftime("%H:00")] += 1
+        dt = event["event_time"]
+        if dt:
+            daily[f"{dt.year:04d}-{dt.month:02d}-{dt.day:02d}"] += 1
+            hourly[f"{dt.hour:02d}:00"] += 1
 
     hours = [f"{h:02d}:00" for h in range(24)]
 
