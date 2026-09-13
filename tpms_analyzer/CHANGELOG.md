@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.31
+
+### Performance
+
+- Combined daily and hourly event aggregation into a single pass over loaded TPMS events, avoiding a redundant full-dataset scan during report refreshes.
+
 ## 0.3.30
 
 ### Performance
