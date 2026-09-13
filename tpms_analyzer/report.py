@@ -354,6 +354,8 @@ def write_report(context):
 
     generated_at = datetime.now().astimezone().strftime("%b %-d, %Y, %-I:%M %p")
 
+    TIMELINE_MAX_POINTS = 10_000
+
     timeline_points = [
         {
             "time": e["event_time"].isoformat() if e["event_time"] else e["event_time_text"],
@@ -369,11 +371,8 @@ def write_report(context):
             "maybe_battery": e.get("maybe_battery"),
             "protocol": e["protocol"],
         }
-        for e in events
+        for e in events[-TIMELINE_MAX_POINTS:]
     ]
-
-    TIMELINE_MAX_POINTS = 10_000
-    timeline_points = timeline_points[-TIMELINE_MAX_POINTS:]
 
     known_count = len([v for v in vehicles if v.get("category") == "known"])
     watch_count = len([v for v in vehicles if v.get("category") == "watch"])
