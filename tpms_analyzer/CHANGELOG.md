@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.30
+
+### Performance
+
+- Reduced report-refresh memory usage by retaining only the decoded TPMS fields actually used by analytics and reporting instead of storing each event's complete parsed rtl_433 payload.
+
+### Changed
+
+- Preserve the original raw-payload availability signal separately so Diagnostics continues to report raw decoded data availability accurately after payload compaction.
+
 ## 0.3.29
 
 ### Changed
