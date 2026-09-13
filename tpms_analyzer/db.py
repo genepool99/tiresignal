@@ -14,6 +14,15 @@ from tpms_config import (
 
 from utils import as_float, first_present, normalize_sensor_id, parse_time
 
+# Kept in sync manually with analysis.DECODED_FIELD_NAMES rather than
+# imported from analysis.py: db.py is a self-contained, low-level
+# data-access module today (only tpms_config/utils), and analysis.py is a
+# higher-level module downstream of it in the refresh pipeline. Importing
+# from analysis.py here wouldn't create a literal import cycle, but it
+# would invert that layering for the sake of six stable, rarely-changing
+# names -- not a worthwhile trade.
+_DECODED_FIELD_NAMES = ("moving", "flags", "state", "status", "learn", "mic")
+
 
 def connect_db():
     conn = sqlite3.connect(DB_PATH)
@@ -307,6 +316,25 @@ def load_events(conn):
         if not isinstance(raw_packet, dict):
             raw_packet = {}
 
+        # Whether the ORIGINAL parsed packet was a non-empty JSON object,
+        # captured before compaction below so diagnostics reporting keeps
+        # reflecting the true source payload, not just the compact subset.
+        has_raw = bool(raw_packet)
+
+        # Every downstream consumer of event["raw"] (summarize_decoded_fields,
+        # summarize_flags_for_sensor_ids, recent_events_section) only ever
+        # reads these six decoder-specific keys -- everything else in the
+        # original packet duplicates a value already stored in its own DB
+        # column. Use membership (`in`), not truthiness/.get(), so a key
+        # that was present with a falsy value (None/False/0/"") is still
+        # carried over: summarize_decoded_fields() distinguishes presence
+        # from absence.
+        compact_raw = {
+            name: raw_packet[name]
+            for name in _DECODED_FIELD_NAMES
+            if name in raw_packet
+        }
+
         events.append({
             "event_time": event_time,
             "event_time_text": row["event_time"],
@@ -321,7 +349,8 @@ def load_events(conn):
             "rssi": row["rssi"],
             "snr": row["snr"],
             "noise": row["noise"],
-            "raw": raw_packet,
+            "raw": compact_raw,
+            "has_raw": has_raw,
         })
 
     return events

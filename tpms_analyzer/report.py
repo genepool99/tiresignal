@@ -2159,7 +2159,7 @@ def diagnostics_summary_section(generated_at, events, sensor_summaries, raw_pack
     events_with_rssi = sum(1 for e in events if e.get("rssi") is not None)
     events_with_snr = sum(1 for e in events if e.get("snr") is not None)
     events_with_noise = sum(1 for e in events if e.get("noise") is not None)
-    events_with_raw = sum(1 for e in events if isinstance(e.get("raw"), dict) and e.get("raw"))
+    events_with_raw = sum(1 for e in events if e.get("has_raw"))
 
     return f"""
     <div class="section">
