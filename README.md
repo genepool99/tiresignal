@@ -4,17 +4,18 @@
 
 # TireSignal
 
-TireSignal is a Home Assistant add-on for `rtl_433` TPMS JSONL logs. It imports tire-pressure sensor events, groups likely vehicle passes, helps identify known, watch, and unknown sensors, and produces a Home Assistant-friendly report for reviewing activity and labeling vehicles.
+TireSignal is a Home Assistant add-on for `rtl_433` TPMS JSONL logs. It imports tire-pressure sensor events, groups likely vehicle passes, and helps you label sensors as Known, Watchlist, or Ignored vehicles while surfacing recurring unlabeled sensor groups as candidates worth reviewing, all through a Home Assistant-friendly report.
 
 ## Features
 
-* Reads `rtl_433` JSONL log output.
-* Stores TPMS events in SQLite with deduplication.
-* Groups nearby detections into likely vehicle passes.
-* Matches sensors against known, watch, and ignored vehicles.
-* Provides report UI controls for vehicle labeling.
-* Serves the report through Home Assistant Ingress/sidebar.
-* Supports direct web access on port `8099` when exposed.
+* Reads `rtl_433` JSONL log output and stores TPMS events in SQLite with deduplication and configurable retention.
+* Groups nearby detections into likely vehicle passes and surfaces exact-repeat and overlap candidates for recurring unlabeled sensors.
+* Lets you label sensors as Known, Watchlist, or Ignored vehicles.
+* Presence timeline and 7-day traffic heatmap for home-security and traffic-awareness use cases.
+* Analytics tab with event, signal, and decoded TPMS field charts.
+* Diagnostics tab with import/pruning stats and report & database health.
+* Recent Events, Recent Passes, and Raw Packets views for deeper investigation.
+* Serves the report through Home Assistant Ingress/sidebar, with direct web access on port `8099` when exposed.
 * Runs manual and scheduled refreshes inside the add-on.
 
 ![TireSignal report screenshot](assets/tiresignal-report-screenshot.png)
@@ -91,9 +92,18 @@ These options are safe to leave at their defaults for most installs.
 * Open the report from the Home Assistant sidebar or **Open Web UI**.
 * Click **Refresh** in the report to rerun analysis.
 * Use the report labeling controls to add sensors to the vehicle map.
-* Review the **Candidates** tab to identify unknown or repeated sensor groups. Use the row action menu (`⋮`) on each row to label, ignore, move, or inspect candidates. Mixed sensor type warnings are informational only and do not affect scoring.
 * Leave scheduled refresh enabled to refresh the report daily.
 * Direct access is available on port `8099` when exposed by the add-on configuration.
+
+### Report tabs
+
+* **Overview** — summary cards, presence overview, presence timeline, and traffic heatmap.
+* **Vehicles** — manage Known, Watchlist, and Ignored vehicles.
+* **Candidates** — review exact-repeat and overlap candidates that may point to a recurring unlabeled vehicle. Use the row action menu (`⋮`) on each row to label, ignore, move, or inspect candidates. Mixed sensor type warnings are informational only and do not affect scoring.
+* **Analytics** — event, signal, and decoded TPMS field charts.
+* **Details** — Recent Passes, sensor summaries, and Recent Events.
+* **Raw Packets** — recent rtl_433 log entries for troubleshooting.
+* **Diagnostics** — import/pruning stats and report & database health.
 
 ## Endpoints
 

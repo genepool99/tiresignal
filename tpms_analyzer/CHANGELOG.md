@@ -1,5 +1,39 @@
 # Changelog
 
+## 1.0.0
+
+### Added
+
+- Added persistent TPMS event monitoring from rtl_433 logs with SQLite history and configurable retention/pruning.
+- Added vehicle pass detection and recurring-signal candidate analysis, including exact-repeat and overlap candidates.
+- Added workflows for managing Known, Watchlist, and Ignored vehicles with editable names and notes.
+- Added a Candidate Details drawer with sensor, pass, model, protocol, pressure, and signal-quality information.
+- Added presence and traffic analysis with a 24-hour presence timeline, 7-day traffic heatmap, and recent presence activity.
+- Added Analytics for event volume, signal quality, temperature, battery-related signals, and decoded TPMS fields.
+- Added Recent Events, Recent Passes, Raw Packets, Vehicles, and Diagnostics views for deeper investigation and system visibility.
+- Added Report & Database Health diagnostics alongside import and pruning statistics.
+- Added Home Assistant Ingress support, scheduled refreshes, and configurable add-on behavior.
+
+### Changed
+
+- Refined TireSignal's report organization into Overview, Vehicles, Candidates, Analytics, Details, Raw Packets, and Diagnostics.
+- Improved timestamps, candidate naming, row actions, dialogs, and vehicle-management workflows throughout the report.
+- Improved the manual report refresh experience with a visible loading spinner, clear in-progress and completion messaging, and explicit feedback when another refresh is already running or a refresh fails.
+
+### Performance
+
+- Replaced quadratic overlap-candidate clustering with indexed sensor-to-cluster lookups for substantially better scalability.
+- Added event-time indexing and avoided unnecessary SQLite VACUUM operations when pruning removes no events.
+- Reduced refresh memory usage by retaining only the decoded raw-event fields needed by analytics and reporting.
+- Combined daily and hourly aggregation work and replaced repeated datetime formatting with direct component formatting.
+- Reduced report-generation work by building timeline data only for the retained timeline window instead of processing the full event history.
+
+### Reliability
+
+- Improved refresh behavior under Home Assistant Ingress and remote access paths.
+- Ensured full-history event-volume analytics remain accurate when viewing all-time data.
+- Corrected pruning transaction ordering so deletions are committed safely before SQLite VACUUM runs.
+
 ## 0.3.34
 
 ### Changed

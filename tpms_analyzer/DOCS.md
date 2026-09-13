@@ -2,7 +2,7 @@
 
 ## Overview
 
-TireSignal is a persistent Home Assistant add-on service for `rtl_433` TPMS JSONL logs. It imports tire-pressure sensor events, groups likely vehicle passes, helps identify known, watch, and unknown sensors, and serves a Home Assistant-friendly report through Ingress/sidebar or direct access on port `8099` when exposed.
+TireSignal is a persistent Home Assistant add-on service for `rtl_433` TPMS JSONL logs. It imports tire-pressure sensor events, groups likely vehicle passes, and helps you label sensors as Known, Watchlist, or Ignored vehicles while surfacing recurring unlabeled sensor groups as candidates worth reviewing. It serves a Home Assistant-friendly report through Ingress/sidebar or direct access on port `8099` when exposed.
 
 ## rtl_433 requirement
 
@@ -49,8 +49,17 @@ These options are safe to leave at their defaults for most installs.
 * Open TireSignal from the Home Assistant sidebar or click **Open Web UI** on the add-on page.
 * Click **Refresh** in the report for manual analysis.
 * Use the report vehicle-labeling controls to add or update sensor labels.
-* Review the Candidates tab to identify unknown or repeated sensor groups. Use the row action menu (`⋮`) on each row to add a candidate to the watch list, ignore it, move a saved match, or inspect details when available.
 * Leave scheduled refresh enabled to refresh the report daily.
+
+The report is organized into tabs:
+
+* **Overview** — summary cards plus presence and traffic overview, including the presence timeline and traffic heatmap.
+* **Vehicles** — manage Known, Watchlist, and Ignored vehicles.
+* **Candidates** — review exact-repeat and overlap candidates that may point to a recurring unlabeled vehicle. Use the row action menu (`⋮`) on each row to add a candidate to the watchlist, ignore it, move a saved match, or inspect details when available.
+* **Analytics** — event, signal, and decoded TPMS field charts.
+* **Details** — Recent Passes, sensor summaries, and Recent Events.
+* **Raw Packets** — recent rtl_433 log entries for troubleshooting.
+* **Diagnostics** — import/pruning stats and report & database health.
 
 ## Endpoints
 
