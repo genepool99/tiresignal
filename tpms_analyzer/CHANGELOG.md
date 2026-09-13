@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.32
+
+### Performance
+
+- Replaced repeated strftime() calls in daily/hourly event aggregation with direct datetime component formatting, substantially reducing full-history analytics processing time while preserving existing date/hour bucketing behavior.
+
 ## 0.3.31
 
 ### Performance
