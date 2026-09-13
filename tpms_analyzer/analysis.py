@@ -624,25 +624,32 @@ def find_new_unknown_candidates(overlap_candidates):
     return rows[:50]
 
 
-def daily_counts(events):
-    counts = Counter()
+def daily_and_hourly_counts(events):
+    daily = Counter()
+    hourly = Counter()
 
     for event in events:
         if event["event_time"]:
-            counts[event["event_time"].strftime("%Y-%m-%d")] += 1
+            daily[event["event_time"].strftime("%Y-%m-%d")] += 1
+            hourly[event["event_time"].strftime("%H:00")] += 1
 
-    return [{"date": date, "count": count} for date, count in sorted(counts.items())]
+    hours = [f"{h:02d}:00" for h in range(24)]
+
+    daily_result = [{"date": date, "count": count} for date, count in sorted(daily.items())]
+    hourly_result = [{"hour": hour, "count": hourly.get(hour, 0)} for hour in hours]
+
+    return (
+        daily_result,
+        hourly_result,
+    )
+
+
+def daily_counts(events):
+    return daily_and_hourly_counts(events)[0]
 
 
 def hourly_counts(events):
-    counts = Counter()
-
-    for event in events:
-        if event["event_time"]:
-            counts[event["event_time"].strftime("%H:00")] += 1
-
-    hours = [f"{h:02d}:00" for h in range(24)]
-    return [{"hour": hour, "count": counts.get(hour, 0)} for hour in hours]
+    return daily_and_hourly_counts(events)[1]
 
 
 def recent_events(events):

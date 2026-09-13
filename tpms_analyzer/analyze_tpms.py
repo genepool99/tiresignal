@@ -7,10 +7,9 @@ import shutil
 from analysis import (
     build_presence_timeline,
     build_traffic_heatmap,
-    daily_counts,
+    daily_and_hourly_counts,
     find_new_unknown_candidates,
     group_vehicle_passes,
-    hourly_counts,
     recent_events,
     recent_passes,
     summarize_decoded_fields,
@@ -81,6 +80,8 @@ def main():
         overlap_candidate_summaries,
     )
 
+    daily_counts_result, hourly_counts_result = daily_and_hourly_counts(events)
+
     context = {
         "vehicles": vehicles,
         "events": events,
@@ -95,8 +96,8 @@ def main():
         "presence_summary": presence_summary,
         "presence_timeline": presence_timeline,
         "traffic_heatmap": traffic_heatmap,
-        "daily_counts": daily_counts(events),
-        "hourly_counts": hourly_counts(events),
+        "daily_counts": daily_counts_result,
+        "hourly_counts": hourly_counts_result,
         "decoded_field_summary": summarize_decoded_fields(events),
         "ingest_stats": ingest_stats,
         "prune_stats": prune_stats,
