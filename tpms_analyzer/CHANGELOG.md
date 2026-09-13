@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.34
+
+### Changed
+
+- Improved the manual report refresh experience with a visible loading spinner, clearer in-progress and completion messaging, and better feedback when a refresh is already running or fails.
+
 ## 0.3.33
 
 ### Performance
