@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.33
+
+### Performance
+
+- Build timeline chart data only from the final retained event window instead of constructing timeline records for the entire loaded dataset and discarding most of them afterward.
+
 ## 0.3.32
 
 ### Performance
