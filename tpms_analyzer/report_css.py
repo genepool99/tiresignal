@@ -916,6 +916,37 @@ CSS_BLOCK = """
       cursor: wait;
     }
 
+    .refresh-button {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .refresh-button-spinner {
+      width: 14px;
+      height: 14px;
+      border: 2px solid rgba(255, 255, 255, 0.55);
+      border-top-color: #ffffff;
+      border-radius: 999px;
+      flex-shrink: 0;
+      animation: report-loading-spin 0.75s linear infinite;
+    }
+
+    .refresh-button-spinner[hidden] {
+      display: none;
+    }
+
+    .refresh-status {
+      font-size: 12px;
+      color: var(--muted);
+      max-width: 260px;
+      text-align: right;
+    }
+
+    .refresh-status:empty {
+      display: none;
+    }
+
     .tabs {
       display: flex;
       gap: 4px;

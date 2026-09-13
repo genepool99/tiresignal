@@ -27,32 +27,101 @@ JS_BLOCK = """    function getServiceBaseUrl() {
 
     async function refreshReport() {
       const button = document.getElementById("refreshButton");
-      const originalText = button.innerText;
+      const spinner = document.getElementById("refreshButtonSpinner");
+      const label = document.getElementById("refreshButtonLabel");
+      const status = document.getElementById("refreshStatus");
+      const defaultLabel = "Refresh Report";
+
+      function setLabel(text) {
+        if (label) {
+          label.textContent = text;
+        } else {
+          button.innerText = text;
+        }
+      }
+
+      function setStatus(text) {
+        if (status) {
+          status.textContent = text || "";
+        }
+      }
+
+      function showSpinner(visible) {
+        if (!spinner) return;
+        spinner.hidden = !visible;
+      }
+
+      button.disabled = true;
+      showSpinner(true);
+      setLabel("Refreshing…");
+      setStatus("Refreshing TireSignal data — this may take about 30 seconds.");
 
       try {
-        button.disabled = true;
-        button.innerText = "Refreshing...";
-
         const response = await fetch(refreshWebhookUrl, {
           method: "POST"
         });
 
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
+        let payload = null;
+        try {
+          payload = await response.clone().json();
+        } catch (parseError) {
+          payload = null;
         }
 
-        button.innerText = "Refresh requested";
+        if (!response.ok) {
+          if (
+            response.status === 503 &&
+            payload &&
+            typeof payload.error === "string" &&
+            payload.error.indexOf("Analysis already in progress") !== -1
+          ) {
+            showSpinner(false);
+            setLabel("Refresh already running");
+            setStatus("A refresh is already in progress. Please wait for it to finish.");
+
+            setTimeout(() => {
+              button.disabled = false;
+              setLabel(defaultLabel);
+              setStatus("");
+            }, 5000);
+            return;
+          }
+
+          const errorDetail = payload && payload.error ? payload.error : null;
+          showSpinner(false);
+          setLabel("Refresh failed");
+          setStatus(
+            errorDetail
+              ? `Refresh failed: ${errorDetail}`
+              : `Refresh failed (HTTP ${response.status}). Please try again.`
+          );
+
+          setTimeout(() => {
+            button.disabled = false;
+            setLabel(defaultLabel);
+            setStatus("");
+          }, 5000);
+          return;
+        }
+
+        showSpinner(false);
+        setLabel("Refresh complete");
+        setStatus("Refresh complete — reloading report…");
 
         setTimeout(() => {
           window.location.reload();
-        }, 2500);
+        }, 900);
       } catch (error) {
         console.error(error);
-        button.innerText = "Refresh failed";
+        showSpinner(false);
+        setLabel("Refresh failed");
+        setStatus(`Unable to complete the refresh request. ${error.message}`);
+
         setTimeout(() => {
-          button.innerText = originalText;
           button.disabled = false;
-        }, 4000);
+          setLabel(defaultLabel);
+          setStatus("");
+        }, 5000);
       }
     }
 

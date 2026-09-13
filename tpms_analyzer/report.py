@@ -592,8 +592,10 @@ def html_start(generated_at):
           </div>
         </div>
         <button id="refreshButton" class="refresh-button" onclick="refreshReport()">
-          Refresh Report
+          <span id="refreshButtonSpinner" class="refresh-button-spinner" aria-hidden="true" hidden></span>
+          <span id="refreshButtonLabel">Refresh Report</span>
         </button>
+        <span id="refreshStatus" class="refresh-status" role="status" aria-live="polite"></span>
       </div>
     </div>
   </header>
